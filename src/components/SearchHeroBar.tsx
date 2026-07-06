@@ -1,0 +1,207 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
+import { navigateTo } from '../utils/navigation';
+import HithaDatePicker from './HithaDatePicker';
+
+export default function SearchHeroBar() {
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
+  const [date, setDate] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [specSearch, setSpecSearch] = useState('');
+
+  const specializations = [
+    'Psychiatry',
+    'Psychology',
+    'Counseling',
+    'Neurology',
+    'Cardiology'
+  ];
+
+  const filteredSpecs = specializations.filter((spec) =>
+    spec.toLowerCase().includes(specSearch.toLowerCase())
+  );
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Map human-friendly category to system Specialization query param
+    let mappedCategory = category;
+    if (category === 'Psychiatry') {
+      mappedCategory = 'Consultant Psychiatrist'; // Match psychiatrist
+    } else if (category === 'Psychology') {
+      mappedCategory = 'Clinical Psychologist'; // Match psychologist
+    } else if (category === 'Counseling') {
+      mappedCategory = 'Clinical Counselor'; // Match counselor
+    }
+
+    navigateTo('/search', {
+      name: name || undefined,
+      category: mappedCategory || undefined,
+      date: date || undefined,
+      page: 1,
+    });
+  };
+
+  // Helper to format date for display
+  const formatDisplayDate = (dateStr: string) => {
+    if (!dateStr) return 'Select Date';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  return (
+    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 relative z-30">
+      <form
+        onSubmit={handleSearch}
+        className="bg-[#0B1E17] border border-[#1E4B3A]/80 rounded-[24px] sm:rounded-full p-4 sm:p-3 shadow-2xl flex flex-col sm:flex-row gap-3 items-stretch sm:items-center"
+        id="hero-custom-search-form"
+      >
+        {/* Doctor Name Search Input */}
+        <div className="flex-1 relative">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-sprout/60 flex items-center pointer-events-none">
+            <Search className="w-4 h-4" />
+          </div>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Search Doctor Name"
+            className="w-full bg-[#152B22] hover:bg-[#1A3429] focus:bg-[#1A3429] border border-[#2B4E41] focus:border-mint/50 rounded-[14px] sm:rounded-full pl-11 pr-4 py-3 sm:py-3.5 text-white text-sm outline-none transition-all placeholder:text-sprout/50 font-sans"
+            id="hero-name-search-input"
+          />
+        </div>
+
+        {/* Custom Specialization Dropdown Button */}
+        <div className="flex-1 relative">
+          <button
+            type="button"
+            onClick={() => {
+              setIsDropdownOpen(!isDropdownOpen);
+              setIsDatePickerOpen(false);
+            }}
+            className="w-full bg-[#152B22] hover:bg-[#1A3429] border border-[#2B4E41] hover:border-mint/40 rounded-[14px] sm:rounded-full px-5 py-3 sm:py-3.5 text-left text-sm text-white flex items-center justify-between cursor-pointer transition-all outline-none"
+            id="hero-spec-dropdown-trigger"
+          >
+            <span className={category ? 'text-white font-medium' : 'text-sprout/50'}>
+              {category || 'Select Specialization'}
+            </span>
+            {isDropdownOpen ? (
+              <ChevronUp className="w-4 h-4 text-sprout/60 shrink-0" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-sprout/60 shrink-0" />
+            )}
+          </button>
+
+          {/* Custom Dropdown Panel */}
+          {isDropdownOpen && (
+            <>
+              {/* Backing screen overlay to close the dropdown */}
+              <div 
+                className="fixed inset-0 z-40 cursor-default" 
+                onClick={() => setIsDropdownOpen(false)} 
+              />
+              <div 
+                className="absolute top-full left-0 right-0 mt-2 bg-[#0B1E17] border border-[#2B4E41] rounded-[16px] shadow-2xl p-3 z-50 animate-fade-in flex flex-col gap-2"
+                id="hero-spec-dropdown-panel"
+              >
+                {/* Search field within dropdown */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={specSearch}
+                    onChange={(e) => setSpecSearch(e.target.value)}
+                    placeholder="Search specialization..."
+                    className="w-full bg-[#152B22] border border-[#2B4E41] text-white text-xs rounded-[10px] px-3 py-2 outline-none focus:border-mint/50 placeholder:text-sprout/40"
+                    id="hero-spec-search-input"
+                    autoFocus
+                  />
+                </div>
+
+                {/* Option items */}
+                <div className="max-h-[200px] overflow-y-auto space-y-1 pr-1">
+                  {filteredSpecs.length > 0 ? (
+                    filteredSpecs.map((spec) => (
+                      <button
+                        key={spec}
+                        type="button"
+                        onClick={() => {
+                          setCategory(spec);
+                          setIsDropdownOpen(false);
+                          setSpecSearch('');
+                        }}
+                        className={`w-full text-left px-3 py-2.5 rounded-[10px] text-xs transition-colors flex items-center justify-between cursor-pointer ${
+                          category === spec
+                            ? 'bg-mint text-[#0B1E17] font-semibold'
+                            : 'text-white hover:bg-[#1A3429]'
+                        }`}
+                      >
+                        <span>{spec}</span>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="text-center py-4 text-sprout/40 text-xs">
+                      No specializations found
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Premium Hitha Date Selector */}
+        <div className="flex-1 relative">
+          <button
+            type="button"
+            onClick={() => {
+              setIsDatePickerOpen(!isDatePickerOpen);
+              setIsDropdownOpen(false);
+            }}
+            className="w-full bg-[#152B22] hover:bg-[#1A3429] border border-[#2B4E41] hover:border-mint/40 rounded-[14px] sm:rounded-full px-5 py-3 sm:py-3.5 text-left text-sm text-white flex items-center justify-between cursor-pointer transition-all outline-none"
+            id="hero-datepicker-trigger"
+          >
+            <span className={date ? 'text-white font-medium' : 'text-sprout/50'}>
+              {formatDisplayDate(date)}
+            </span>
+            <Calendar className="text-sprout/60 w-4.5 h-4.5 shrink-0" />
+          </button>
+
+          {isDatePickerOpen && (
+            <>
+              {/* Overlay to close on outside click */}
+              <div 
+                className="fixed inset-0 z-40 cursor-default" 
+                onClick={() => setIsDatePickerOpen(false)} 
+              />
+              <HithaDatePicker
+                selectedDate={date}
+                onDateChange={(selectedDateStr) => {
+                  setDate(selectedDateStr);
+                  setIsDatePickerOpen(false);
+                }}
+                onClose={() => setIsDatePickerOpen(false)}
+              />
+            </>
+          )}
+        </div>
+
+        {/* Search Submit Button */}
+        <button
+          type="submit"
+          className="bg-[#8FCB84] hover:bg-[#9ED993] text-[#0B1E17] font-sans font-bold text-sm px-6 py-3 sm:py-3.5 rounded-[14px] sm:rounded-full transition-all duration-300 shadow-md hover:shadow-lg transform active:scale-95 flex items-center justify-center space-x-2 cursor-pointer shrink-0"
+          id="hero-submit-btn"
+        >
+          <Search className="w-4 h-4" />
+          <span>Search</span>
+        </button>
+      </form>
+    </div>
+  );
+}

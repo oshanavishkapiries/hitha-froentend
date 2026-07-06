@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Noto Sans Sinhala", "Noto Sans Tamil", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Poppins", "Noto Sans Sinhala", "Noto Sans Tamil", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-cream: #F7F4EC;
+  --color-mint: #8FCB84;
+  --color-mint-dark: #6EAE64;
+  --color-mint-text: #123227;
+  --color-forest: #1E4B3A;
+  --color-moss: #6B8F71;
+  --color-sprout: #C9DFC7;
+  --color-saffron: #D4A24C;
+  --color-clay: #B5533C;
+  --color-clay-tint: #F4E2DD;
+  --color-ink: #1B2420;
+  --color-ink-soft: #4B564F;
+  --color-ink-faint: #8A9490;
+  --color-hairline: #E2DCCB;
+
+  --radius-card: 22px;
+  --radius-sub: 14px;
+  --radius-small-comp: 8px;
+
+  --shadow-resting: 0 1px 2px rgba(27, 36, 32, 0.06);
+  --shadow-elevated: 0 6px 20px rgba(30, 75, 58, 0.10);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-fade-in {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+

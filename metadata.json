@@ -1,0 +1,6 @@
+{
+  "name": "Hitha",
+  "description": "A privacy-first mental health support platform for Sri Lanka.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
