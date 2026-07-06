@@ -4,6 +4,7 @@ import { Doctor, FilterParams, Specialization } from '../types';
 import { getQueryParams, updateUrlQueryParams, navigateTo } from '../utils/navigation';
 import DoctorDetailModal from './DoctorDetailModal';
 import HithaDatePicker from './HithaDatePicker';
+import DoctorSearchPopup from './DoctorSearchPopup';
 import { Filter, RotateCcw, Languages, Search, Users, CircleDollarSign, ChevronLeft, ChevronRight, Star, ShieldAlert, Calendar } from 'lucide-react';
 
 export default function SearchPage() {
@@ -19,6 +20,7 @@ export default function SearchPage() {
   });
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [isSearchPopupOpen, setIsSearchPopupOpen] = useState(false);
 
   // Synchronize filters on mount & back/forward browser navigation
   useEffect(() => {
@@ -28,7 +30,20 @@ export default function SearchPage() {
       setFilters(getQueryParams());
     };
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+
+    // Register active search state for top bar
+    (window as any).__hitha_search_active = true;
+    (window as any).__hitha_search_callback = () => {
+      setIsSearchPopupOpen(true);
+    };
+    window.dispatchEvent(new CustomEvent('hitha-search-state-changed'));
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      (window as any).__hitha_search_active = false;
+      (window as any).__hitha_search_callback = null;
+      window.dispatchEvent(new CustomEvent('hitha-search-state-changed'));
+    };
   }, []);
 
   const specializations: Specialization[] = [
@@ -463,6 +478,16 @@ export default function SearchPage() {
         <DoctorDetailModal
           doctor={selectedDoctor}
           onClose={() => setSelectedDoctor(null)}
+        />
+      )}
+
+      {/* Render Search Popup */}
+      {isSearchPopupOpen && (
+        <DoctorSearchPopup
+          isOpen={isSearchPopupOpen}
+          onClose={() => setIsSearchPopupOpen(false)}
+          initialFilters={filters}
+          onApplyFilters={(updates) => handleFilterChange(updates)}
         />
       )}
     </div>

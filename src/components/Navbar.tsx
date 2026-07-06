@@ -1,13 +1,16 @@
 import { BookOpen, CalendarRange } from 'lucide-react';
+import { IconSearch } from '@tabler/icons-react';
 import { navigateTo } from '../utils/navigation';
 import Logo from './Logo';
 
 interface NavbarProps {
   onOpenAppointments: () => void;
   onOpenBlogs: () => void;
+  isSearchEnabled?: boolean;
+  onSearchClick?: () => void;
 }
 
-export default function Navbar({ onOpenAppointments, onOpenBlogs }: NavbarProps) {
+export default function Navbar({ onOpenAppointments, onOpenBlogs, isSearchEnabled, onSearchClick }: NavbarProps) {
   return (
     <nav className="bg-white border-b border-hairline sticky top-0 z-40 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,6 +21,19 @@ export default function Navbar({ onOpenAppointments, onOpenBlogs }: NavbarProps)
 
           {/* Navigation Links and Buttons */}
           <div className="flex items-center space-x-6">
+            {/* Search Trigger Button */}
+            {isSearchEnabled && (
+              <button
+                onClick={onSearchClick}
+                className="flex items-center space-x-1.5 text-xs sm:text-sm font-sans font-semibold text-ink-soft hover:text-forest transition-colors cursor-pointer focus:outline-none"
+                id="nav-search-btn"
+                title="Search Clinicians"
+              >
+                <IconSearch className="w-4.5 h-4.5 text-moss animate-pulse" />
+                <span>Search</span>
+              </button>
+            )}
+
             {/* Blogs Navlink */}
             <button
               onClick={onOpenBlogs}

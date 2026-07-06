@@ -1,9 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ShieldCheck, Award, CreditCard, Globe, Lock } from 'lucide-react';
 import { navigateTo } from '../utils/navigation';
 import SearchHeroBar from './SearchHeroBar';
 
 export default function LandingPage() {
+  useEffect(() => {
+    (window as any).__hitha_search_active = true;
+    (window as any).__hitha_search_callback = () => {
+      window.dispatchEvent(new CustomEvent('hitha-open-doctor-search'));
+    };
+    window.dispatchEvent(new CustomEvent('hitha-search-state-changed'));
+
+    return () => {
+      (window as any).__hitha_search_active = false;
+      (window as any).__hitha_search_callback = null;
+      window.dispatchEvent(new CustomEvent('hitha-search-state-changed'));
+    };
+  }, []);
+
   return (
     <div className="bg-cream min-h-screen">
       {/* Hero Section */}

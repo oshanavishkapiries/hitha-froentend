@@ -49,8 +49,8 @@ export const useRejectDoctor = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const res = await rejectDoctorApplication(id);
+    mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
+      const res = await rejectDoctorApplication(id, reason);
       if (!res.success) {
         throw new Error(res.message || "Failed to reject doctor");
       }
@@ -66,8 +66,8 @@ export const useChangeDoctorStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const res = await changeDoctorStatusUnified(id, status);
+    mutationFn: async ({ id, status, reason }: { id: string; status: string; reason?: string }) => {
+      const res = await changeDoctorStatusUnified(id, status, reason);
       if (!res.success) {
         throw new Error(res.message || "Failed to change doctor status");
       }

@@ -77,12 +77,13 @@ export const approveDoctorApplication = async (id: string): Promise<ApiResponse>
   return response.data;
 };
 
-export const rejectDoctorApplication = async (id: string): Promise<ApiResponse> => {
-  const response = await axiosInstance.post<ApiResponse>(ENDPOINTS.admin.rejectDoctor(id));
+export const rejectDoctorApplication = async (id: string, reason: string): Promise<ApiResponse> => {
+  const response = await axiosInstance.post<ApiResponse>(ENDPOINTS.admin.rejectDoctor(id), { reason });
   return response.data;
 };
 
-export const changeDoctorStatusUnified = async (id: string, status: string): Promise<ApiResponse> => {
-  const response = await axiosInstance.post<ApiResponse>(ENDPOINTS.admin.changeDoctorStatus(id), { status });
+export const changeDoctorStatusUnified = async (id: string, status: string, reason?: string): Promise<ApiResponse> => {
+  const query = `?status=${encodeURIComponent(status)}${reason ? `&reason=${encodeURIComponent(reason)}` : ''}`;
+  const response = await axiosInstance.post<ApiResponse>(`${ENDPOINTS.admin.changeDoctorStatus(id)}${query}`);
   return response.data;
 };

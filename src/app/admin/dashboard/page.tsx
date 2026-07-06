@@ -5,28 +5,30 @@ import AppShell from '../../../components/AppShell';
 import Logo from '../../../components/Logo';
 import { navigateTo } from '../../../utils/navigation';
 import { 
-  Users, 
-  CheckCircle, 
-  AlertTriangle, 
-  ShieldCheck, 
-  CreditCard, 
-  Activity, 
-  Settings, 
-  Search, 
-  TrendingUp, 
-  Download, 
-  LogOut, 
-  Check, 
-  X,
-  FileSpreadsheet,
-  RefreshCw,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
+  IconUsers, 
+  IconCircleCheck, 
+  IconAlertTriangle, 
+  IconShieldCheck, 
+  IconCreditCard, 
+  IconActivity, 
+  IconSettings, 
+  IconSearch, 
+  IconTrendingUp, 
+  IconDownload, 
+  IconLogout, 
+  IconCheck, 
+  IconX,
+  IconFileSpreadsheet,
+  IconRefresh,
+  IconChevronLeft,
+  IconChevronRight,
+  IconStethoscope
+} from '@tabler/icons-react';
 import {
   useDoctorApplications,
   useApproveDoctor,
   useRejectDoctor,
+  useChangeDoctorStatus,
 } from '../../../lib/service/query/useAdmin';
 
 // Mock doctors awaiting SLMC verification as fallback/demo
@@ -44,28 +46,84 @@ const initialEscrowPayments = [
 ];
 
 export default function AdminDashboard() {
-  const [currentTab, setCurrentTab] = useState<'overview' | 'verifications' | 'escrow' | 'config'>('overview');
+  const [currentTab, setCurrentTab] = useState<'overview' | 'doctors' | 'escrow' | 'config'>('overview');
   const [escrows, setEscrows] = useState(initialEscrowPayments);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+
+  // New sub-view selection states
+  const [doctorSubView, setDoctorSubView] = useState<'requests' | 'manage'>('manage');
+  const [activeActionDocId, setActiveActionDocId] = useState<string | null>(null);
+  const [actionType, setActionType] = useState<'reject' | 'suspend' | null>(null);
+  const [actionReason, setActionReason] = useState<string>('');
+
+  // Admin search popups visibility states
+  const [isDoctorSearchPopupOpen, setIsDoctorSearchPopupOpen] = useState(false);
+  const [isEscrowSearchPopupOpen, setIsEscrowSearchPopupOpen] = useState(false);
 
   // React Query service integrations
   const { data: realDocs, isLoading: isRealDocsLoading, refetch: refetchRealDocs } = useDoctorApplications();
   const approveMutation = useApproveDoctor();
   const rejectMutation = useRejectDoctor();
+  const changeStatusMutation = useChangeDoctorStatus();
 
-  // Handle doc verification using secure backend server
-  const handleVerifyDoc = async (id: string, approved: boolean) => {
+  // Approve a doctor's registration
+  const handleApproveDoc = async (id: string) => {
     try {
-      if (approved) {
-        await approveMutation.mutateAsync(id);
-      } else {
-        await rejectMutation.mutateAsync(id);
-      }
-      alert(`Successfully ${approved ? 'approved' : 'rejected'} doctor profile on secure server.`);
+      await approveMutation.mutateAsync(id);
+      alert('Successfully approved doctor profile on secure server.');
       refetchRealDocs();
     } catch (err: any) {
-      alert(`API Error: ${err.message || 'Failed to update doctor status on server.'}`);
+      alert(`API Error: ${err.message || 'Failed to approve doctor status.'}`);
+    }
+  };
+
+  // Submit rejection with reason
+  const submitRejectDoc = async (id: string) => {
+    if (!actionReason.trim()) {
+      alert('Rejection reason is required.');
+      return;
+    }
+    try {
+      await rejectMutation.mutateAsync({ id, reason: actionReason });
+      alert('Successfully rejected doctor profile.');
+      setActiveActionDocId(null);
+      setActionReason('');
+      refetchRealDocs();
+    } catch (err: any) {
+      alert(`API Error: ${err.message || 'Failed to reject doctor profile.'}`);
+    }
+  };
+
+  // Submit suspension with optional reason
+  const submitSuspendDoc = async (id: string) => {
+    try {
+      await changeStatusMutation.mutateAsync({ 
+        id, 
+        status: 'SUSPENDED', 
+        reason: actionReason || 'Administrative suspension' 
+      });
+      alert('Doctor suspended successfully.');
+      setActiveActionDocId(null);
+      setActionReason('');
+      refetchRealDocs();
+    } catch (err: any) {
+      alert(`API Error: ${err.message || 'Failed to suspend doctor.'}`);
+    }
+  };
+
+  // Handle re-activation
+  const handleUnsuspendDoc = async (id: string) => {
+    try {
+      await changeStatusMutation.mutateAsync({ 
+        id, 
+        status: 'ACTIVE', 
+        reason: 'Re-activated by administrator' 
+      });
+      alert('Doctor activated/unsuspended successfully.');
+      refetchRealDocs();
+    } catch (err: any) {
+      alert(`API Error: ${err.message || 'Failed to activate doctor.'}`);
     }
   };
 
@@ -133,25 +191,25 @@ export default function AdminDashboard() {
                 id="admin-tab-overview"
                 title="Overview & Analytics"
               >
-                <TrendingUp className="w-4 h-4 text-mint shrink-0" />
+                <IconTrendingUp className="w-4 h-4 text-mint shrink-0" />
                 {!isSidebarCollapsed && <span>Overview & Analytics</span>}
               </button>
 
               <div className="relative">
                 <button
-                  onClick={() => setCurrentTab('verifications')}
+                  onClick={() => setCurrentTab('doctors')}
                   className={`text-left rounded-xl text-xs font-semibold flex items-center transition-all cursor-pointer ${
                     isSidebarCollapsed ? 'justify-center p-3 w-12 h-12 mx-auto' : 'px-4 py-3 space-x-3 w-full'
                   } ${
-                    currentTab === 'verifications' ? 'bg-[#152B22] text-white font-bold border border-[#2B4E41]' : 'text-sprout/70 hover:bg-forest/20'
+                    currentTab === 'doctors' ? 'bg-[#152B22] text-white font-bold border border-[#2B4E41]' : 'text-sprout/70 hover:bg-forest/20'
                   }`}
-                  id="admin-tab-verifications"
-                  title="SLMC Verifications"
+                  id="admin-tab-doctors"
+                  title="Doctor Management"
                 >
-                  <ShieldCheck className="w-4 h-4 text-mint shrink-0" />
+                  <IconStethoscope className="w-4 h-4 text-mint shrink-0" />
                   {!isSidebarCollapsed && (
                     <div className="flex-1 flex justify-between items-center min-w-0">
-                      <span className="truncate">SLMC Verifications</span>
+                      <span className="truncate">Doctor Registry</span>
                       {activeDoctors.filter(d => d.status === 'Pending Verification').length > 0 && (
                         <span className="bg-red-500 text-white text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full shrink-0 ml-1">
                           {activeDoctors.filter(d => d.status === 'Pending Verification').length}
@@ -178,7 +236,7 @@ export default function AdminDashboard() {
                 id="admin-tab-escrow"
                 title="Escrow Payments"
               >
-                <CreditCard className="w-4 h-4 text-mint shrink-0" />
+                <IconCreditCard className="w-4 h-4 text-mint shrink-0" />
                 {!isSidebarCollapsed && <span>Escrow Payments</span>}
               </button>
 
@@ -192,7 +250,7 @@ export default function AdminDashboard() {
                 id="admin-tab-config"
                 title="System Configuration"
               >
-                <Settings className="w-4 h-4 text-mint shrink-0" />
+                <IconSettings className="w-4 h-4 text-mint shrink-0" />
                 {!isSidebarCollapsed && <span>System Configuration</span>}
               </button>
             </nav>
@@ -208,7 +266,7 @@ export default function AdminDashboard() {
               id="admin-sidebar-logout"
               title="Sign Out"
             >
-              <LogOut className="w-3.5 h-3.5 shrink-0" />
+              <IconLogout className="w-3.5 h-3.5 shrink-0" />
               {!isSidebarCollapsed && <span>Sign Out</span>}
             </button>
           </div>
@@ -228,29 +286,33 @@ export default function AdminDashboard() {
                 id="admin-sidebar-toggle-btn"
               >
                 {isSidebarCollapsed ? (
-                  <ChevronRight className="w-4 h-4 text-[#0B1E17]" />
+                  <IconChevronRight className="w-4 h-4 text-[#0B1E17]" />
                 ) : (
-                  <ChevronLeft className="w-4 h-4 text-[#0B1E17]" />
+                  <IconChevronLeft className="w-4 h-4 text-[#0B1E17]" />
                 )}
               </button>
             </div>
 
             {/* Header Right (search, profile) */}
             <div className="flex items-center space-x-6">
-              {/* Search Element */}
-              <div className="relative max-w-xs">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#0B1E17]/40">
-                  <Search className="w-3.5 h-3.5" />
-                </span>
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="bg-[#FAF9F5] border border-[#EBE8DF] text-xs text-[#0B1E17] placeholder:text-[#0B1E17]/40 rounded-xl pl-9 pr-4 py-1.5 w-40 sm:w-48 focus:outline-none focus:border-mint/60 focus:bg-white transition-all shadow-inner"
-                  id="dashboard-search-input"
-                />
-              </div>
+              {/* Search Button (not an input field!) */}
+              {(currentTab === 'doctors' || currentTab === 'escrow') && (
+                <button
+                  onClick={() => {
+                    if (currentTab === 'doctors') {
+                      setIsDoctorSearchPopupOpen(true);
+                    } else if (currentTab === 'escrow') {
+                      setIsEscrowSearchPopupOpen(true);
+                    }
+                  }}
+                  className="bg-[#FAF9F5] border border-[#EBE8DF] hover:bg-cream hover:text-forest transition-all text-[#0B1E17] text-xs font-bold rounded-xl px-4 py-1.5 flex items-center space-x-1.5 shadow-sm cursor-pointer focus:outline-none"
+                  title="Search Current Section"
+                  id="dashboard-header-search-btn"
+                >
+                  <IconSearch className="w-4 h-4 text-forest animate-pulse" />
+                  <span>Search</span>
+                </button>
+              )}
 
               {/* Profile Element */}
               <div className="flex items-center space-x-2.5 pl-4 border-l border-[#EBE8DF]" id="admin-header-profile">
@@ -330,7 +392,7 @@ export default function AdminDashboard() {
                 <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-hairline shadow-resting space-y-4">
                   <div className="flex justify-between items-center pb-2 border-b border-hairline">
                     <h3 className="font-display font-bold text-forest text-sm flex items-center space-x-2">
-                      <Activity className="w-4 h-4 text-mint" />
+                      <IconActivity className="w-4 h-4 text-mint" />
                       <span>Counseling Session Volume Growth (Last 6 Months)</span>
                     </h3>
                     <div className="flex items-center space-x-2 text-[10px] font-bold text-forest">
@@ -364,7 +426,7 @@ export default function AdminDashboard() {
                 <div className="bg-white p-6 rounded-3xl border border-hairline shadow-resting space-y-4">
                   <div className="pb-2 border-b border-hairline flex justify-between items-center">
                     <h3 className="font-display font-bold text-forest text-sm flex items-center space-x-2">
-                      <Activity className="w-4 h-4 text-mint" />
+                      <IconActivity className="w-4 h-4 text-mint" />
                       <span>Security Events Log</span>
                     </h3>
                     <span className="text-[10px] text-mint font-bold uppercase">Real-Time</span>
@@ -402,88 +464,282 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* 2. DOCTOR VERIFICATIONS TAB */}
-          {currentTab === 'verifications' && (
+          {/* 2. DOCTOR REGISTRY TAB */}
+          {currentTab === 'doctors' && (
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-hairline shadow-resting space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-hairline">
+              
+              {/* Header with Subview Dropdown Page Selector */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#EBE8DF]">
                 <div>
-                  <h2 className="text-xl font-display font-bold text-forest">SLMC Credentials Verification Board</h2>
-                  <p className="text-xs text-ink-soft mt-1">Validate doctor registration IDs with Sri Lanka Medical Council database records to approve directories.</p>
+                  <h2 className="text-xl font-display font-bold text-forest">Doctor Registry Portal</h2>
+                  <p className="text-xs text-ink-soft mt-1">Manage approved practitioners, audit statuses, or verify incoming registration requests.</p>
                 </div>
-                <div className="relative w-full sm:w-64">
-                  <Search className="w-4 h-4 text-ink-soft/40 absolute left-3 top-1/2 -translate-y-1/2" />
+                
+                {/* Dropdown Page Selector requested by user */}
+                <div className="flex items-center space-x-3 w-full sm:w-auto">
+                  <label htmlFor="doctor-subview-selector" className="text-xs font-bold text-forest whitespace-nowrap">View Section:</label>
+                  <select
+                    id="doctor-subview-selector"
+                    value={doctorSubView}
+                    onChange={(e) => {
+                      setDoctorSubView(e.target.value as 'requests' | 'manage');
+                      setActiveActionDocId(null);
+                      setActionReason('');
+                    }}
+                    className="bg-[#FAF9F5] border border-[#EBE8DF] text-xs text-[#0B1E17] font-bold rounded-xl px-3.5 py-2 outline-none focus:border-forest shadow-sm cursor-pointer"
+                  >
+                    <option value="requests">Registration Requests ({activeDoctors.filter(d => d.status === 'Pending Verification' || d.status === 'PENDING_APPROVAL' || d.status === 'PENDING_VERIFICATION').length})</option>
+                    <option value="manage">Manage Registered Doctors ({activeDoctors.filter(d => d.status === 'Verified & Active' || d.status === 'ACTIVE' || d.status === 'SUSPENDED').length})</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Sub-header Controls with Search Bar */}
+              <div className="flex justify-between items-center bg-[#FAF9F5] p-3 rounded-xl border border-hairline">
+                <div className="flex items-center space-x-3">
+                  <span className="text-xs text-ink-soft font-semibold">
+                    Showing {doctorSubView === 'requests' ? 'Awaiting SLMC Verification' : 'Platform Practitioners'}
+                  </span>
+                  {doctorSubView === 'manage' && (
+                    <button
+                      onClick={() => setDoctorSubView('requests')}
+                      className="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-red-200 cursor-pointer flex items-center space-x-1"
+                      id="view-requests-btn"
+                    >
+                      <span>Registration Requests</span>
+                      <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-mono">
+                        {activeDoctors.filter(d => d.status === 'Pending Verification' || d.status === 'PENDING_APPROVAL' || d.status === 'PENDING_VERIFICATION').length}
+                      </span>
+                    </button>
+                  )}
+                  {doctorSubView === 'requests' && (
+                    <button
+                      onClick={() => setDoctorSubView('manage')}
+                      className="bg-[#FAF9F5] hover:bg-cream border border-[#EBE8DF] text-forest text-xs font-bold px-3 py-1.5 rounded-xl cursor-pointer"
+                      id="view-manage-btn"
+                    >
+                      ← Back to Doctor Directory
+                    </button>
+                  )}
+                </div>
+                <div className="relative w-64">
+                  <IconSearch className="w-4 h-4 text-ink-soft/40 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search doctor or SLMC no..."
-                    className="w-full bg-cream/40 border border-hairline rounded-xl pl-9 pr-4 py-2 text-xs outline-none focus:border-forest"
+                    placeholder="Search doctor name or SLMC..."
+                    className="w-full bg-white border border-hairline rounded-xl pl-9 pr-4 py-1.5 text-xs outline-none focus:border-forest text-forest font-semibold"
                   />
                 </div>
               </div>
 
-              {/* Pending List table */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
-                  <thead>
-                    <tr className="border-b border-hairline text-forest font-bold uppercase text-[10px] tracking-wider bg-cream/10">
-                      <th className="py-3 px-4">Doctor Name</th>
-                      <th className="py-3 px-4">SLMC Registration No</th>
-                      <th className="py-3 px-4">Specialization</th>
-                      <th className="py-3 px-4">Registration Date</th>
-                      <th className="py-3 px-4">System Status</th>
-                      <th className="py-3 px-4 text-right">Verification Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activeDoctors
-                      .filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.slmc.toLowerCase().includes(searchTerm.toLowerCase()))
-                      .map(doc => (
-                        <tr key={doc.id} className="border-b border-hairline hover:bg-cream/20 transition-colors">
-                          <td className="py-4 px-4 font-bold text-forest">{doc.name}</td>
-                          <td className="py-4 px-4 font-mono font-semibold text-ink-soft">{doc.slmc}</td>
-                          <td className="py-4 px-4 text-ink-soft">{doc.spec}</td>
-                          <td className="py-4 px-4 font-mono text-ink-soft">{doc.regDate}</td>
-                          <td className="py-4 px-4">
-                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                              doc.status === 'Verified & Active' 
-                                ? 'bg-mint/20 text-forest' 
-                                : doc.status === 'Rejected' 
-                                ? 'bg-red-100 text-red-800' 
-                                : 'bg-yellow-100 text-yellow-800 animate-pulse'
-                            }`}>
-                              {doc.status}
-                            </span>
-                          </td>
-                          <td className="py-4 px-4 text-right">
-                            {doc.status === 'Pending Verification' ? (
-                              <div className="flex justify-end gap-2">
-                                <button
-                                  onClick={() => handleVerifyDoc(doc.id, false)}
-                                  disabled={approveMutation.isPending || rejectMutation.isPending}
-                                  className="p-1.5 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg cursor-pointer transition-colors disabled:opacity-50"
-                                  title="Reject Registration"
-                                >
-                                  <X className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleVerifyDoc(doc.id, true)}
-                                  disabled={approveMutation.isPending || rejectMutation.isPending}
-                                  className="p-1.5 bg-mint/20 hover:bg-mint/40 text-forest rounded-lg cursor-pointer transition-colors disabled:opacity-50"
-                                  title="Verify & Publish Profile"
-                                >
-                                  <Check className="w-4 h-4" />
-                                </button>
-                              </div>
-                            ) : (
-                              <span className="text-[10px] text-ink-soft italic">No action needed</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
+              {/* View 1: Doctor Registration Requests */}
+              {doctorSubView === 'requests' && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-hairline text-forest font-bold uppercase text-[10px] tracking-wider bg-[#FAF9F5]">
+                        <th className="py-3 px-4">Doctor Name</th>
+                        <th className="py-3 px-4">SLMC Registration No</th>
+                        <th className="py-3 px-4">Specialization</th>
+                        <th className="py-3 px-4">Registration Date</th>
+                        <th className="py-3 px-4">Status</th>
+                        <th className="py-3 px-4 text-right">Verification Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {activeDoctors
+                        .filter(d => d.status === 'Pending Verification' || d.status === 'PENDING_APPROVAL' || d.status === 'PENDING_VERIFICATION')
+                        .filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.slmc.toLowerCase().includes(searchTerm.toLowerCase()))
+                        .map(doc => (
+                          <tr key={doc.id} className="border-b border-hairline hover:bg-cream/10 transition-colors">
+                            <td className="py-4 px-4 font-bold text-forest">{doc.name}</td>
+                            <td className="py-4 px-4 font-mono font-semibold text-ink-soft">{doc.slmc}</td>
+                            <td className="py-4 px-4 text-ink-soft">{doc.spec}</td>
+                            <td className="py-4 px-4 font-mono text-ink-soft">{doc.regDate}</td>
+                            <td className="py-4 px-4">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-yellow-100 text-yellow-800 animate-pulse">
+                                Pending Approval
+                              </span>
+                            </td>
+                            <td className="py-4 px-4 text-right">
+                              {activeActionDocId === doc.id && actionType === 'reject' ? (
+                                <div className="inline-block text-left bg-red-50 p-3 rounded-xl border border-red-200 mt-1 max-w-sm">
+                                  <label className="block text-[10px] font-bold text-red-800 mb-1">Reason for Rejection (Required):</label>
+                                  <textarea
+                                    placeholder="e.g. SLMC number mismatch or documents unreadable."
+                                    value={actionReason}
+                                    onChange={(e) => setActionReason(e.target.value)}
+                                    rows={2}
+                                    className="w-full text-xs p-2 border border-red-200 rounded-lg outline-none focus:border-red-400 bg-white text-[#0B1E17]"
+                                  />
+                                  <div className="flex justify-end gap-1.5 mt-2">
+                                    <button
+                                      onClick={() => {
+                                        setActiveActionDocId(null);
+                                        setActionReason('');
+                                      }}
+                                      className="px-2.5 py-1 text-[10px] bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-bold cursor-pointer"
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button
+                                      onClick={() => submitRejectDoc(doc.id)}
+                                      disabled={rejectMutation.isPending}
+                                      className="px-2.5 py-1 text-[10px] bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold disabled:opacity-50 cursor-pointer"
+                                    >
+                                      Reject
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex justify-end gap-2">
+                                  <button
+                                    onClick={() => {
+                                      setActiveActionDocId(doc.id);
+                                      setActionType('reject');
+                                      setActionReason('');
+                                    }}
+                                    disabled={approveMutation.isPending || rejectMutation.isPending}
+                                    className="p-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg cursor-pointer transition-colors disabled:opacity-50 flex items-center justify-center"
+                                    title="Reject Request"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleApproveDoc(doc.id)}
+                                    disabled={approveMutation.isPending || rejectMutation.isPending}
+                                    className="p-2 bg-mint/20 hover:bg-mint/40 text-forest rounded-lg cursor-pointer transition-colors disabled:opacity-50 flex items-center justify-center"
+                                    title="Approve & Activate"
+                                  >
+                                    <Check className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      {activeDoctors
+                        .filter(d => d.status === 'Pending Verification' || d.status === 'PENDING_APPROVAL' || d.status === 'PENDING_VERIFICATION')
+                        .filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.slmc.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                          <tr>
+                            <td colSpan={6} className="text-center py-8 text-ink-soft italic">
+                              No registration requests awaiting verification.
+                            </td>
+                          </tr>
+                        )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* View 2: Manage Registered Doctors */}
+              {doctorSubView === 'manage' && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-hairline text-forest font-bold uppercase text-[10px] tracking-wider bg-[#FAF9F5]">
+                        <th className="py-3 px-4">Doctor Name</th>
+                        <th className="py-3 px-4">SLMC Registration No</th>
+                        <th className="py-3 px-4">Specialization</th>
+                        <th className="py-3 px-4">Registration Date</th>
+                        <th className="py-3 px-4">Status</th>
+                        <th className="py-3 px-4 text-right font-bold">Platform Management</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {activeDoctors
+                        .filter(d => d.status === 'Verified & Active' || d.status === 'ACTIVE' || d.status === 'SUSPENDED')
+                        .filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.slmc.toLowerCase().includes(searchTerm.toLowerCase()))
+                        .map(doc => {
+                          const isSuspended = doc.status === 'SUSPENDED';
+                          return (
+                            <tr key={doc.id} className="border-b border-hairline hover:bg-cream/10 transition-colors">
+                              <td className="py-4 px-4 font-bold text-forest">{doc.name}</td>
+                              <td className="py-4 px-4 font-mono font-semibold text-ink-soft">{doc.slmc}</td>
+                              <td className="py-4 px-4 text-ink-soft">{doc.spec}</td>
+                              <td className="py-4 px-4 font-mono text-ink-soft">{doc.regDate}</td>
+                              <td className="py-4 px-4">
+                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                  isSuspended ? 'bg-red-100 text-red-800' : 'bg-mint/20 text-forest'
+                                }`}>
+                                  {isSuspended ? 'Suspended' : 'Active'}
+                                </span>
+                              </td>
+                              <td className="py-4 px-4 text-right">
+                                {activeActionDocId === doc.id && actionType === 'suspend' ? (
+                                  <div className="inline-block text-left bg-yellow-50 p-3 rounded-xl border border-yellow-200 mt-1 max-w-sm">
+                                    <label className="block text-[10px] font-bold text-yellow-800 mb-1">Reason for Suspension (Optional):</label>
+                                    <textarea
+                                      placeholder="e.g. Quality audit or patient complaints."
+                                      value={actionReason}
+                                      onChange={(e) => setActionReason(e.target.value)}
+                                      rows={2}
+                                      className="w-full text-xs p-2 border border-yellow-200 rounded-lg outline-none focus:border-yellow-400 bg-white text-[#0B1E17]"
+                                    />
+                                    <div className="flex justify-end gap-1.5 mt-2">
+                                      <button
+                                        onClick={() => {
+                                          setActiveActionDocId(null);
+                                          setActionReason('');
+                                        }}
+                                        className="px-2.5 py-1 text-[10px] bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-bold cursor-pointer"
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        onClick={() => submitSuspendDoc(doc.id)}
+                                        disabled={changeStatusMutation.isPending}
+                                        className="px-2.5 py-1 text-[10px] bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-bold disabled:opacity-50 cursor-pointer"
+                                      >
+                                        Suspend
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex justify-end gap-2">
+                                    {isSuspended ? (
+                                      <button
+                                        onClick={() => handleUnsuspendDoc(doc.id)}
+                                        disabled={changeStatusMutation.isPending}
+                                        className="px-3 py-1.5 bg-mint/20 hover:bg-mint/40 text-forest rounded-lg text-[10px] font-bold transition-all cursor-pointer disabled:opacity-50"
+                                      >
+                                        Activate Doctor
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={() => {
+                                          setActiveActionDocId(doc.id);
+                                          setActionType('suspend');
+                                          setActionReason('');
+                                        }}
+                                        disabled={changeStatusMutation.isPending}
+                                        className="px-3 py-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-lg text-[10px] font-bold transition-all cursor-pointer disabled:opacity-50"
+                                      >
+                                        Suspend Doctor
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      {activeDoctors
+                        .filter(d => d.status === 'Verified & Active' || d.status === 'ACTIVE' || d.status === 'SUSPENDED')
+                        .filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.slmc.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                          <tr>
+                            <td colSpan={6} className="text-center py-8 text-ink-soft italic">
+                              No registered clinical practitioners found.
+                            </td>
+                          </tr>
+                        )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              
             </div>
           )}
 
@@ -496,7 +752,7 @@ export default function AdminDashboard() {
                   <p className="text-xs text-ink-soft mt-1">Audit and release funds securely. Patients pay in escrow, released to doctors upon session completion.</p>
                 </div>
                 <button className="bg-cream hover:bg-cream-dark text-forest text-xs font-bold py-2 px-4 rounded-xl transition-all border border-hairline flex items-center space-x-1.5">
-                  <FileSpreadsheet className="w-4 h-4 text-mint" />
+                  <IconFileSpreadsheet className="w-4 h-4 text-mint" />
                   <span>Export Spreadsheet</span>
                 </button>
               </div>
@@ -615,7 +871,7 @@ export default function AdminDashboard() {
               </div>
 
               <div className="bg-mint/10 p-4 rounded-xl border border-mint/30 flex items-start gap-3 text-xs">
-                <AlertTriangle className="w-5 h-5 text-forest shrink-0 mt-0.5" />
+                <IconAlertTriangle className="w-5 h-5 text-forest shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-bold text-forest">Administrative Directive #19-A</h4>
                   <p className="text-forest/80 leading-relaxed mt-0.5">
@@ -639,6 +895,84 @@ export default function AdminDashboard() {
         </main>
       </div>
     </div>
+
+    {/* Admin Doctor Registry Search Popup */}
+    {isDoctorSearchPopupOpen && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-forest/30 backdrop-blur-xs animate-fade-in">
+        <div className="bg-white rounded-3xl p-6 w-full max-w-md border border-hairline shadow-elevated relative">
+          <div className="flex justify-between items-center pb-4 border-b border-hairline mb-4">
+            <h3 className="font-display font-bold text-forest flex items-center gap-2">
+              <IconSearch className="w-4 h-4 text-mint" />
+              <span>Search Doctors Directory</span>
+            </h3>
+            <button 
+              onClick={() => setIsDoctorSearchPopupOpen(false)}
+              className="p-1 hover:bg-[#FAF9F5] rounded-lg transition-all cursor-pointer"
+            >
+              <IconX className="w-4 h-4 text-ink-soft" />
+            </button>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-bold text-forest uppercase tracking-wider mb-1">Doctor Name or SLMC No.</label>
+              <input
+                type="text"
+                placeholder="e.g. Dr. Sanduni or SLMC-9321"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-[#FAF9F5] border border-[#EBE8DF] text-xs text-[#0B1E17] font-semibold rounded-xl px-3.5 py-2.5 outline-none focus:border-forest"
+              />
+            </div>
+            <button
+              onClick={() => setIsDoctorSearchPopupOpen(false)}
+              className="w-full bg-forest hover:bg-forest/95 text-white text-xs font-bold py-2.5 rounded-xl cursor-pointer transition-all flex items-center justify-center space-x-2"
+            >
+              <IconSearch className="w-4 h-4 text-mint" />
+              <span>Apply Search Filter</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Admin Escrow Payments Search Popup */}
+    {isEscrowSearchPopupOpen && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-forest/30 backdrop-blur-xs animate-fade-in">
+        <div className="bg-white rounded-3xl p-6 w-full max-w-md border border-hairline shadow-elevated relative">
+          <div className="flex justify-between items-center pb-4 border-b border-hairline mb-4">
+            <h3 className="font-display font-bold text-forest flex items-center gap-2">
+              <IconSearch className="w-4 h-4 text-mint" />
+              <span>Search Escrow Payments</span>
+            </h3>
+            <button 
+              onClick={() => setIsEscrowSearchPopupOpen(false)}
+              className="p-1 hover:bg-[#FAF9F5] rounded-lg transition-all cursor-pointer"
+            >
+              <IconX className="w-4 h-4 text-ink-soft" />
+            </button>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-bold text-forest uppercase tracking-wider mb-1">Search Patient, Doctor or Status</label>
+              <input
+                type="text"
+                placeholder="e.g. Patient A, held, active"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-[#FAF9F5] border border-[#EBE8DF] text-xs text-[#0B1E17] font-semibold rounded-xl px-3.5 py-2.5 outline-none focus:border-forest"
+              />
+            </div>
+            <button
+              onClick={() => setIsEscrowSearchPopupOpen(false)}
+              className="w-full bg-forest hover:bg-forest/95 text-white text-xs font-bold py-2.5 rounded-xl cursor-pointer transition-all flex items-center justify-center space-x-2"
+            >
+              <IconSearch className="w-4 h-4 text-mint" />
+              <span>Apply Escrow Search</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   </AppShell>
   );
 }

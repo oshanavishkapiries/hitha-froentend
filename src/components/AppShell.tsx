@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
 import Navbar from './Navbar';
@@ -8,6 +8,7 @@ import AdminNavbar from './AdminNavbar';
 import DoctorNavbar from './DoctorNavbar';
 import MyAppointmentsModal from './MyAppointmentsModal';
 import BlogsModal from './BlogsModal';
+import DoctorSearchPopup from './DoctorSearchPopup';
 import { navigateTo } from '../utils/navigation';
 
 interface AppShellProps {
@@ -17,10 +18,30 @@ interface AppShellProps {
 export default function AppShell({ children }: AppShellProps) {
   const [showAppointments, setShowAppointments] = useState(false);
   const [showBlogs, setShowBlogs] = useState(false);
+  const [showDoctorSearch, setShowDoctorSearch] = useState(false);
+  const [isSearchEnabled, setIsSearchEnabled] = useState(false);
   const pathname = usePathname() || "";
 
   const isAdminRoute = pathname.startsWith('/admin');
   const isDoctorRoute = pathname.startsWith('/doctor');
+
+  useEffect(() => {
+    const handleStateChange = () => {
+      setIsSearchEnabled(!!(window as any).__hitha_search_active);
+    };
+    handleStateChange();
+    window.addEventListener('hitha-search-state-changed', handleStateChange);
+    
+    const handleOpenSearch = () => {
+      setShowDoctorSearch(true);
+    };
+    window.addEventListener('hitha-open-doctor-search', handleOpenSearch);
+
+    return () => {
+      window.removeEventListener('hitha-search-state-changed', handleStateChange);
+      window.removeEventListener('hitha-open-doctor-search', handleOpenSearch);
+    };
+  }, []);
 
   const handleLogout = (role: 'admin' | 'doctor') => {
     Cookies.remove('accesstoken');
@@ -45,6 +66,14 @@ export default function AppShell({ children }: AppShellProps) {
         <Navbar 
           onOpenAppointments={() => setShowAppointments(true)}
           onOpenBlogs={() => setShowBlogs(true)}
+          isSearchEnabled={isSearchEnabled}
+          onSearchClick={() => {
+            if (typeof (window as any).__hitha_search_callback === 'function') {
+              (window as any).__hitha_search_callback();
+            } else {
+              setShowDoctorSearch(true);
+            }
+          }}
         />
       )}
 
@@ -60,6 +89,13 @@ export default function AppShell({ children }: AppShellProps) {
 
       {showBlogs && (
         <BlogsModal onClose={() => setShowBlogs(false)} />
+      )}
+
+      {showDoctorSearch && (
+        <DoctorSearchPopup 
+          isOpen={showDoctorSearch} 
+          onClose={() => setShowDoctorSearch(false)} 
+        />
       )}
 
       {/* Simple Organic Footer */}
