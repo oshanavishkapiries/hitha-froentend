@@ -7,7 +7,21 @@ export default function LandingPage() {
   return (
     <div className="bg-cream min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-visible bg-gradient-to-b from-[#142B22] to-[#1E4B3A] text-white pt-16 pb-28 px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-visible bg-gradient-to-b from-[#142B22] to-[#1E4B3A] text-white pt-20 pb-28 px-4 sm:px-6 lg:px-8">
+        {/* Background Image with top-alignment and linear gradient mask */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+          <img
+            src="https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?q=80&w=1600&auto=format&fit=crop"
+            alt="Serene Forest Sun Rays Sanctuary"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover object-top opacity-20 mix-blend-luminosity"
+            style={{
+              maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 45%, rgba(0,0,0,0) 90%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 45%, rgba(0,0,0,0) 90%)',
+            }}
+          />
+        </div>
+
         {/* Subtle background abstract shapes */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#8FCB84] rounded-full filter blur-[120px] opacity-10 pointer-events-none" />
         <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-[#C9DFC7] rounded-full filter blur-[100px] opacity-10 pointer-events-none" />

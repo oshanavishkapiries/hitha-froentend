@@ -56,8 +56,13 @@ export function navigateTo(path: string, params?: Partial<FilterParams>) {
     });
     url.search = searchParams.toString();
   }
-  window.history.pushState({}, '', url.toString());
-  // Dispatch a custom event to notify listeners of path changes
-  window.dispatchEvent(new Event('popstate'));
+  
+  if (window.location.pathname !== path) {
+    window.location.href = url.toString();
+  } else {
+    window.history.pushState({}, '', url.toString());
+    // Dispatch a custom event to notify listeners of path changes
+    window.dispatchEvent(new Event('popstate'));
+  }
 }
 
