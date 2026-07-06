@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getDoctorApplications,
+  getDoctorDetails,
   approveDoctorApplication,
   rejectDoctorApplication,
   changeDoctorStatusUnified,
@@ -25,6 +26,20 @@ export const useDoctorApplications = () => {
       }
       return [];
     },
+  });
+};
+
+export const useDoctorDetails = (id: string | null) => {
+  return useQuery({
+    queryKey: ["doctor_details", id],
+    queryFn: async () => {
+      const res = await getDoctorDetails(id as string);
+      if (!res.success) {
+        throw new Error(res.message || "Failed to fetch doctor details");
+      }
+      return res.data;
+    },
+    enabled: !!id,
   });
 };
 

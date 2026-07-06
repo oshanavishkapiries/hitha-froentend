@@ -12,6 +12,7 @@ export const ENDPOINTS = {
     sendCode: "/admin/send-code",
     verifyCode: "/admin/verify-code",
     doctors: "/admin/doctors",
+    getDoctor: (id: string) => `/admin/doctors/${id}`,
     approveDoctor: (id: string) => `/admin/doctors/${id}/approve`,
     rejectDoctor: (id: string) => `/admin/doctors/${id}/reject`,
     changeDoctorStatus: (id: string) => `/admin/doctors/${id}/status`,

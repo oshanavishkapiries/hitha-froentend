@@ -22,13 +22,21 @@ import {
   IconRefresh,
   IconChevronLeft,
   IconChevronRight,
-  IconStethoscope
+  IconStethoscope,
+  IconEye,
+  IconMail,
+  IconPhone,
+  IconLanguage,
+  IconCertificate,
+  IconFileText,
+  IconUserCircle
 } from '@tabler/icons-react';
 import {
   useDoctorApplications,
   useApproveDoctor,
   useRejectDoctor,
   useChangeDoctorStatus,
+  useDoctorDetails,
 } from '../../../lib/service/query/useAdmin';
 
 // Mock doctors awaiting SLMC verification as fallback/demo
@@ -61,11 +69,20 @@ export default function AdminDashboard() {
   const [isDoctorSearchPopupOpen, setIsDoctorSearchPopupOpen] = useState(false);
   const [isEscrowSearchPopupOpen, setIsEscrowSearchPopupOpen] = useState(false);
 
+  // Doctor details popup state
+  const [viewDoctorId, setViewDoctorId] = useState<string | null>(null);
+
+  // Pagination state (separate per sub-view)
+  const DOCTORS_PAGE_SIZE = 8;
+  const [requestsPage, setRequestsPage] = useState(1);
+  const [managePage, setManagePage] = useState(1);
+
   // React Query service integrations
   const { data: realDocs, isLoading: isRealDocsLoading, refetch: refetchRealDocs } = useDoctorApplications();
   const approveMutation = useApproveDoctor();
   const rejectMutation = useRejectDoctor();
   const changeStatusMutation = useChangeDoctorStatus();
+  const { data: viewedDoctor, isLoading: isViewedDoctorLoading, isError: isViewedDoctorError } = useDoctorDetails(viewDoctorId);
 
   // Approve a doctor's registration
   const handleApproveDoc = async (id: string) => {
@@ -154,6 +171,33 @@ export default function AdminDashboard() {
 
   const activeDoctors = getActiveDoctorsList();
 
+  // Filtered lists for each sub-view
+  const filteredRequestDocs = activeDoctors
+    .filter(d => d.status === 'Pending Verification' || d.status === 'PENDING_APPROVAL' || d.status === 'PENDING_VERIFICATION')
+    .filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.slmc.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredManagedDocs = activeDoctors
+    .filter(d => d.status === 'Verified & Active' || d.status === 'ACTIVE' || d.status === 'SUSPENDED')
+    .filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.slmc.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  // Paginated slices
+  const requestsTotalPages = Math.max(1, Math.ceil(filteredRequestDocs.length / DOCTORS_PAGE_SIZE));
+  const manageTotalPages = Math.max(1, Math.ceil(filteredManagedDocs.length / DOCTORS_PAGE_SIZE));
+  const clampedRequestsPage = Math.min(requestsPage, requestsTotalPages);
+  const clampedManagePage = Math.min(managePage, manageTotalPages);
+  const paginatedRequestDocs = filteredRequestDocs.slice(
+    (clampedRequestsPage - 1) * DOCTORS_PAGE_SIZE,
+    clampedRequestsPage * DOCTORS_PAGE_SIZE
+  );
+  const paginatedManagedDocs = filteredManagedDocs.slice(
+    (clampedManagePage - 1) * DOCTORS_PAGE_SIZE,
+    clampedManagePage * DOCTORS_PAGE_SIZE
+  );
+
+  useEffect(() => {
+    setRequestsPage(1);
+    setManagePage(1);
+  }, [searchTerm]);
+
   return (
     <AppShell>
       <div className="bg-[#FAF9F5] min-h-screen flex flex-row overflow-hidden" id="admin-dashboard-container">
@@ -197,7 +241,10 @@ export default function AdminDashboard() {
 
               <div className="relative">
                 <button
-                  onClick={() => setCurrentTab('doctors')}
+                  onClick={() => {
+                    setCurrentTab('doctors');
+                    setDoctorSubView('manage');
+                  }}
                   className={`text-left rounded-xl text-xs font-semibold flex items-center transition-all cursor-pointer ${
                     isSidebarCollapsed ? 'justify-center p-3 w-12 h-12 mx-auto' : 'px-4 py-3 space-x-3 w-full'
                   } ${
@@ -336,6 +383,27 @@ export default function AdminDashboard() {
                 <h1 className="text-2xl font-display font-bold text-forest">Administration Dashboard</h1>
                 <p className="text-xs text-ink-soft mt-1">Manage doctor verifications, escrow releases, and platform statistics.</p>
               </div>
+              <button
+                onClick={() => {
+                  if (currentTab === 'doctors' && doctorSubView === 'requests') {
+                    setDoctorSubView('manage');
+                  } else {
+                    setCurrentTab('doctors');
+                    setDoctorSubView('requests');
+                  }
+                }}
+                className="bg-mint/20 hover:bg-mint/40 text-forest text-xs font-bold px-4 py-2.5 rounded-xl border border-mint/30 cursor-pointer flex items-center space-x-2 transition-all"
+                id="dashboard-registration-requests-btn"
+                title={currentTab === 'doctors' && doctorSubView === 'requests' ? "Go to Doctor Management Section" : "Go to Registration Request Page"}
+              >
+                <IconStethoscope className="w-4 h-4" />
+                <span>{currentTab === 'doctors' && doctorSubView === 'requests' ? 'Manage Doctors' : 'View Requests'}</span>
+                {!(currentTab === 'doctors' && doctorSubView === 'requests') && activeDoctors.filter(d => d.status === 'Pending Verification' || d.status === 'PENDING_APPROVAL' || d.status === 'PENDING_VERIFICATION').length > 0 && (
+                  <span className="bg-red-500 text-white text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full">
+                    {activeDoctors.filter(d => d.status === 'Pending Verification' || d.status === 'PENDING_APPROVAL' || d.status === 'PENDING_VERIFICATION').length}
+                  </span>
+                )}
+              </button>
             </div>
 
             {/* 1. OVERVIEW & ANALYTICS TAB */}
@@ -468,69 +536,11 @@ export default function AdminDashboard() {
           {currentTab === 'doctors' && (
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-hairline shadow-resting space-y-6">
               
-              {/* Header with Subview Dropdown Page Selector */}
+              {/* Header */}
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#EBE8DF]">
                 <div>
                   <h2 className="text-xl font-display font-bold text-forest">Doctor Registry Portal</h2>
                   <p className="text-xs text-ink-soft mt-1">Manage approved practitioners, audit statuses, or verify incoming registration requests.</p>
-                </div>
-                
-                {/* Dropdown Page Selector requested by user */}
-                <div className="flex items-center space-x-3 w-full sm:w-auto">
-                  <label htmlFor="doctor-subview-selector" className="text-xs font-bold text-forest whitespace-nowrap">View Section:</label>
-                  <select
-                    id="doctor-subview-selector"
-                    value={doctorSubView}
-                    onChange={(e) => {
-                      setDoctorSubView(e.target.value as 'requests' | 'manage');
-                      setActiveActionDocId(null);
-                      setActionReason('');
-                    }}
-                    className="bg-[#FAF9F5] border border-[#EBE8DF] text-xs text-[#0B1E17] font-bold rounded-xl px-3.5 py-2 outline-none focus:border-forest shadow-sm cursor-pointer"
-                  >
-                    <option value="requests">Registration Requests ({activeDoctors.filter(d => d.status === 'Pending Verification' || d.status === 'PENDING_APPROVAL' || d.status === 'PENDING_VERIFICATION').length})</option>
-                    <option value="manage">Manage Registered Doctors ({activeDoctors.filter(d => d.status === 'Verified & Active' || d.status === 'ACTIVE' || d.status === 'SUSPENDED').length})</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Sub-header Controls with Search Bar */}
-              <div className="flex justify-between items-center bg-[#FAF9F5] p-3 rounded-xl border border-hairline">
-                <div className="flex items-center space-x-3">
-                  <span className="text-xs text-ink-soft font-semibold">
-                    Showing {doctorSubView === 'requests' ? 'Awaiting SLMC Verification' : 'Platform Practitioners'}
-                  </span>
-                  {doctorSubView === 'manage' && (
-                    <button
-                      onClick={() => setDoctorSubView('requests')}
-                      className="bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-red-200 cursor-pointer flex items-center space-x-1"
-                      id="view-requests-btn"
-                    >
-                      <span>Registration Requests</span>
-                      <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-mono">
-                        {activeDoctors.filter(d => d.status === 'Pending Verification' || d.status === 'PENDING_APPROVAL' || d.status === 'PENDING_VERIFICATION').length}
-                      </span>
-                    </button>
-                  )}
-                  {doctorSubView === 'requests' && (
-                    <button
-                      onClick={() => setDoctorSubView('manage')}
-                      className="bg-[#FAF9F5] hover:bg-cream border border-[#EBE8DF] text-forest text-xs font-bold px-3 py-1.5 rounded-xl cursor-pointer"
-                      id="view-manage-btn"
-                    >
-                      ← Back to Doctor Directory
-                    </button>
-                  )}
-                </div>
-                <div className="relative w-64">
-                  <IconSearch className="w-4 h-4 text-ink-soft/40 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search doctor name or SLMC..."
-                    className="w-full bg-white border border-hairline rounded-xl pl-9 pr-4 py-1.5 text-xs outline-none focus:border-forest text-forest font-semibold"
-                  />
                 </div>
               </div>
 
@@ -549,9 +559,7 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {activeDoctors
-                        .filter(d => d.status === 'Pending Verification' || d.status === 'PENDING_APPROVAL' || d.status === 'PENDING_VERIFICATION')
-                        .filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.slmc.toLowerCase().includes(searchTerm.toLowerCase()))
+                      {paginatedRequestDocs
                         .map(doc => (
                           <tr key={doc.id} className="border-b border-hairline hover:bg-cream/10 transition-colors">
                             <td className="py-4 px-4 font-bold text-forest">{doc.name}</td>
@@ -596,6 +604,13 @@ export default function AdminDashboard() {
                               ) : (
                                 <div className="flex justify-end gap-2">
                                   <button
+                                    onClick={() => setViewDoctorId(doc.id)}
+                                    className="p-2 bg-[#FAF9F5] hover:bg-cream text-forest rounded-lg cursor-pointer transition-colors flex items-center justify-center border border-hairline"
+                                    title="View Doctor Details"
+                                  >
+                                    <IconEye className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
                                     onClick={() => {
                                       setActiveActionDocId(doc.id);
                                       setActionType('reject');
@@ -620,9 +635,7 @@ export default function AdminDashboard() {
                             </td>
                           </tr>
                         ))}
-                      {activeDoctors
-                        .filter(d => d.status === 'Pending Verification' || d.status === 'PENDING_APPROVAL' || d.status === 'PENDING_VERIFICATION')
-                        .filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.slmc.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                      {filteredRequestDocs.length === 0 && (
                           <tr>
                             <td colSpan={6} className="text-center py-8 text-ink-soft italic">
                               No registration requests awaiting verification.
@@ -631,6 +644,36 @@ export default function AdminDashboard() {
                         )}
                     </tbody>
                   </table>
+                </div>
+              )}
+
+              {/* Pagination: Registration Requests */}
+              {doctorSubView === 'requests' && filteredRequestDocs.length > 0 && (
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-[11px] text-ink-soft font-semibold">
+                    Showing {(clampedRequestsPage - 1) * DOCTORS_PAGE_SIZE + 1}-{Math.min(clampedRequestsPage * DOCTORS_PAGE_SIZE, filteredRequestDocs.length)} of {filteredRequestDocs.length}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setRequestsPage(p => Math.max(1, p - 1))}
+                      disabled={clampedRequestsPage === 1}
+                      className="p-1.5 border border-hairline rounded-lg bg-white text-forest hover:bg-[#FAF9F5] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all"
+                      id="requests-pagination-prev"
+                    >
+                      <IconChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="text-[11px] font-bold text-forest">
+                      Page {clampedRequestsPage} of {requestsTotalPages}
+                    </span>
+                    <button
+                      onClick={() => setRequestsPage(p => Math.min(requestsTotalPages, p + 1))}
+                      disabled={clampedRequestsPage === requestsTotalPages}
+                      className="p-1.5 border border-hairline rounded-lg bg-white text-forest hover:bg-[#FAF9F5] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all"
+                      id="requests-pagination-next"
+                    >
+                      <IconChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -649,9 +692,7 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {activeDoctors
-                        .filter(d => d.status === 'Verified & Active' || d.status === 'ACTIVE' || d.status === 'SUSPENDED')
-                        .filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.slmc.toLowerCase().includes(searchTerm.toLowerCase()))
+                      {paginatedManagedDocs
                         .map(doc => {
                           const isSuspended = doc.status === 'SUSPENDED';
                           return (
@@ -699,6 +740,13 @@ export default function AdminDashboard() {
                                   </div>
                                 ) : (
                                   <div className="flex justify-end gap-2">
+                                    <button
+                                      onClick={() => setViewDoctorId(doc.id)}
+                                      className="p-2 bg-[#FAF9F5] hover:bg-cream text-forest rounded-lg cursor-pointer transition-colors flex items-center justify-center border border-hairline"
+                                      title="View Doctor Details"
+                                    >
+                                      <IconEye className="w-3.5 h-3.5" />
+                                    </button>
                                     {isSuspended ? (
                                       <button
                                         onClick={() => handleUnsuspendDoc(doc.id)}
@@ -726,9 +774,7 @@ export default function AdminDashboard() {
                             </tr>
                           );
                         })}
-                      {activeDoctors
-                        .filter(d => d.status === 'Verified & Active' || d.status === 'ACTIVE' || d.status === 'SUSPENDED')
-                        .filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.slmc.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                      {filteredManagedDocs.length === 0 && (
                           <tr>
                             <td colSpan={6} className="text-center py-8 text-ink-soft italic">
                               No registered clinical practitioners found.
@@ -739,7 +785,37 @@ export default function AdminDashboard() {
                   </table>
                 </div>
               )}
-              
+
+              {/* Pagination: Manage Registered Doctors */}
+              {doctorSubView === 'manage' && filteredManagedDocs.length > 0 && (
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-[11px] text-ink-soft font-semibold">
+                    Showing {(clampedManagePage - 1) * DOCTORS_PAGE_SIZE + 1}-{Math.min(clampedManagePage * DOCTORS_PAGE_SIZE, filteredManagedDocs.length)} of {filteredManagedDocs.length}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setManagePage(p => Math.max(1, p - 1))}
+                      disabled={clampedManagePage === 1}
+                      className="p-1.5 border border-hairline rounded-lg bg-white text-forest hover:bg-[#FAF9F5] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all"
+                      id="manage-pagination-prev"
+                    >
+                      <IconChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="text-[11px] font-bold text-forest">
+                      Page {clampedManagePage} of {manageTotalPages}
+                    </span>
+                    <button
+                      onClick={() => setManagePage(p => Math.min(manageTotalPages, p + 1))}
+                      disabled={clampedManagePage === manageTotalPages}
+                      className="p-1.5 border border-hairline rounded-lg bg-white text-forest hover:bg-[#FAF9F5] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all"
+                      id="manage-pagination-next"
+                    >
+                      <IconChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
             </div>
           )}
 
@@ -970,6 +1046,164 @@ export default function AdminDashboard() {
               <span>Apply Escrow Search</span>
             </button>
           </div>
+        </div>
+      </div>
+    )}
+
+    {/* Admin Doctor Details Popup (used by both Registration Requests and Manage Registered Doctors) */}
+    {viewDoctorId && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-forest/30 backdrop-blur-xs animate-fade-in">
+        <div className="bg-white rounded-3xl p-6 w-full max-w-lg border border-hairline shadow-elevated relative max-h-[85vh] overflow-y-auto">
+          <div className="flex justify-between items-center pb-4 border-b border-hairline mb-4">
+            <h3 className="font-display font-bold text-forest flex items-center gap-2">
+              <IconStethoscope className="w-4 h-4 text-mint" />
+              <span>Doctor Profile Details</span>
+            </h3>
+            <button
+              onClick={() => setViewDoctorId(null)}
+              className="p-1 hover:bg-[#FAF9F5] rounded-lg transition-all cursor-pointer"
+            >
+              <IconX className="w-4 h-4 text-ink-soft" />
+            </button>
+          </div>
+
+          {isViewedDoctorLoading && (
+            <div className="py-10 text-center text-xs text-ink-soft font-semibold">Loading doctor details...</div>
+          )}
+
+          {isViewedDoctorError && !isViewedDoctorLoading && (
+            <div className="py-10 text-center text-xs text-red-600 font-semibold">Failed to load doctor details.</div>
+          )}
+
+          {!isViewedDoctorLoading && !isViewedDoctorError && viewedDoctor && (
+            <div className="space-y-5">
+              {/* Header block */}
+              <div className="flex items-center gap-4 pb-4 border-b border-hairline">
+                <div className="w-16 h-16 rounded-full bg-mint/10 border border-mint/30 flex items-center justify-center overflow-hidden shrink-0">
+                  {viewedDoctor.profilePicture ? (
+                    <img src={viewedDoctor.profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <IconUserCircle className="w-9 h-9 text-mint" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-sm font-display font-bold text-forest truncate">
+                    {viewedDoctor.firstName} {viewedDoctor.lastName}
+                  </h4>
+                  <p className="text-[11px] text-ink-soft mt-0.5">{viewedDoctor.category ? viewedDoctor.category.replace(/_/g, " ") : "Counseling Specialist"}</p>
+                  <span className={`inline-block mt-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    viewedDoctor.status === 'ACTIVE' ? 'bg-mint/20 text-forest'
+                      : viewedDoctor.status === 'SUSPENDED' ? 'bg-red-100 text-red-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {viewedDoctor.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* Contact info */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="flex items-start gap-2">
+                  <IconMail className="w-3.5 h-3.5 text-mint shrink-0 mt-0.5" />
+                  <div>
+                    <span className="block text-[10px] uppercase font-bold text-ink-soft tracking-wider">Email</span>
+                    <span className="text-forest font-semibold break-all">{viewedDoctor.email || "N/A"}</span>
+                    {viewedDoctor.isEmailVerified && <span className="ml-1 text-[9px] text-mint font-bold">(Verified)</span>}
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <IconPhone className="w-3.5 h-3.5 text-mint shrink-0 mt-0.5" />
+                  <div>
+                    <span className="block text-[10px] uppercase font-bold text-ink-soft tracking-wider">Phone Number</span>
+                    <span className="text-forest font-semibold">{viewedDoctor.phoneNumber || "N/A"}</span>
+                    {viewedDoctor.isMobileNumberVerified && <span className="ml-1 text-[9px] text-mint font-bold">(Verified)</span>}
+                  </div>
+                </div>
+                <div>
+                  <span className="block text-[10px] uppercase font-bold text-ink-soft tracking-wider">SLMC Registration No</span>
+                  <span className="text-forest font-mono font-semibold">{viewedDoctor.slmcLicenseNumber || "N/A"}</span>
+                </div>
+                <div>
+                  <span className="block text-[10px] uppercase font-bold text-ink-soft tracking-wider">Gender</span>
+                  <span className="text-forest font-semibold">{viewedDoctor.gender || "N/A"}</span>
+                </div>
+                {viewedDoctor.approvedCustomPriceLkr != null && (
+                  <div>
+                    <span className="block text-[10px] uppercase font-bold text-ink-soft tracking-wider">Approved Custom Price</span>
+                    <span className="text-forest font-semibold">LKR {viewedDoctor.approvedCustomPriceLkr}</span>
+                  </div>
+                )}
+                <div>
+                  <span className="block text-[10px] uppercase font-bold text-ink-soft tracking-wider">Profile Complete</span>
+                  <span className="text-forest font-semibold">{viewedDoctor.isProfileComplete ? "Yes" : "No"}</span>
+                </div>
+              </div>
+
+              {/* Bio */}
+              {viewedDoctor.professionalBio && (
+                <div>
+                  <span className="block text-[10px] uppercase font-bold text-ink-soft tracking-wider mb-1">Professional Bio</span>
+                  <p className="text-xs text-ink-soft leading-relaxed bg-[#FAF9F5] p-3 rounded-xl border border-hairline">
+                    {viewedDoctor.professionalBio}
+                  </p>
+                </div>
+              )}
+
+              {/* Languages */}
+              {viewedDoctor.languages && viewedDoctor.languages.length > 0 && (
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-ink-soft tracking-wider mb-1.5 flex items-center gap-1">
+                    <IconLanguage className="w-3.5 h-3.5 text-mint" />
+                    <span>Languages</span>
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {viewedDoctor.languages.map((lang, i) => (
+                      <span key={i} className="px-2.5 py-1 bg-mint/10 border border-mint/30 rounded-lg text-[10px] font-bold text-forest">{lang}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Qualifications */}
+              {viewedDoctor.qualifications && viewedDoctor.qualifications.length > 0 && (
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-ink-soft tracking-wider mb-1.5 flex items-center gap-1">
+                    <IconCertificate className="w-3.5 h-3.5 text-mint" />
+                    <span>Qualifications</span>
+                  </span>
+                  <ul className="list-disc list-inside space-y-0.5 text-xs text-forest font-semibold">
+                    {viewedDoctor.qualifications.map((q, i) => (
+                      <li key={i}>{q}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Documents */}
+              {viewedDoctor.documents && viewedDoctor.documents.length > 0 && (
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-ink-soft tracking-wider mb-1.5 flex items-center gap-1">
+                    <IconFileText className="w-3.5 h-3.5 text-mint" />
+                    <span>Submitted Documents</span>
+                  </span>
+                  <div className="space-y-1.5">
+                    {viewedDoctor.documents.map((doc, i) => (
+                      <a
+                        key={i}
+                        href={doc}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-[11px] text-forest font-semibold underline hover:text-mint truncate"
+                      >
+                        <IconFileText className="w-3 h-3 shrink-0" />
+                        <span className="truncate">Document {i + 1}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     )}

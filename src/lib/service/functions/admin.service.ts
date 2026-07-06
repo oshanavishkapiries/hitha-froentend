@@ -67,8 +67,35 @@ export const adminVerifyCode = async (payload: VerifyCodeRequest): Promise<ApiRe
   return response.data;
 };
 
+export interface DoctorProfileDetail {
+  id: string;
+  authUserId: string;
+  email: string;
+  phoneNumber: string;
+  firstName: string;
+  lastName: string;
+  profilePicture?: string;
+  slmcLicenseNumber?: string;
+  professionalBio?: string;
+  status: string;
+  gender?: string;
+  category?: string;
+  languages?: string[];
+  qualifications?: string[];
+  documents?: string[];
+  isProfileComplete?: boolean;
+  isMobileNumberVerified?: boolean;
+  isEmailVerified?: boolean;
+  approvedCustomPriceLkr?: number;
+}
+
 export const getDoctorApplications = async (): Promise<ApiResponse<DoctorApplicant[]>> => {
   const response = await axiosInstance.get<ApiResponse<DoctorApplicant[]>>(ENDPOINTS.admin.doctors);
+  return response.data;
+};
+
+export const getDoctorDetails = async (id: string): Promise<ApiResponse<DoctorProfileDetail>> => {
+  const response = await axiosInstance.get<ApiResponse<DoctorProfileDetail>>(ENDPOINTS.admin.getDoctor(id));
   return response.data;
 };
 
