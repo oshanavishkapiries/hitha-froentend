@@ -146,7 +146,7 @@ export default function DoctorRegisterPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-ink-soft mb-1.5">First Name</label>
                 <div className="relative">
@@ -328,7 +328,7 @@ export default function DoctorRegisterPage() {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-ink-soft mb-1.5">Password</label>
                 <div className="relative">
