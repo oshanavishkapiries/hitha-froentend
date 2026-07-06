@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import AppShell from '../../../components/AppShell';
 import Logo from '../../../components/Logo';
 import { navigateTo } from '../../../utils/navigation';
@@ -211,17 +212,32 @@ export default function AdminDashboard() {
         }`} id="admin-sidebar">
           {/* Logo Element (Top section aligned with right header) */}
           <div className="h-16 flex items-center px-6 border-b border-[#152B22] shrink-0 justify-between" id="admin-sidebar-logo-container">
-            {!isSidebarCollapsed ? (
-              <Logo theme="light" id="admin-sidebar-logo" className="text-xl" />
-            ) : (
-              <button 
-                onClick={() => navigateTo('/')} 
-                className="font-display font-bold text-xl text-mint mx-auto cursor-pointer focus:outline-none"
-                id="admin-sidebar-logo-collapsed"
-              >
-                H
-              </button>
-            )}
+            <AnimatePresence mode="wait">
+              {!isSidebarCollapsed ? (
+                <motion.div
+                  key="full-logo"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <Logo theme="light" id="admin-sidebar-logo" className="text-xl" />
+                </motion.div>
+              ) : (
+                <motion.button
+                  key="collapsed-logo"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  onClick={() => navigateTo('/')}
+                  className="font-display font-bold text-xl text-mint mx-auto cursor-pointer focus:outline-none"
+                  id="admin-sidebar-logo-collapsed"
+                >
+                  H
+                </motion.button>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Sidebar Navigation (Middle section) */}
@@ -230,7 +246,7 @@ export default function AdminDashboard() {
             <nav className="flex flex-col gap-2">
               <button
                 onClick={() => setCurrentTab('overview')}
-                className={`text-left rounded-xl text-xs font-semibold flex items-center transition-all cursor-pointer ${
+                className={`text-left rounded-xl text-xs font-semibold flex items-center transition-all duration-300 cursor-pointer ${
                   isSidebarCollapsed ? 'justify-center p-3 w-12 h-12 mx-auto' : 'px-4 py-3 space-x-3 w-full'
                 } ${
                   currentTab === 'overview' ? 'bg-[#152B22] text-white font-bold border border-[#2B4E41]' : 'text-sprout/70 hover:bg-forest/20'
@@ -239,7 +255,19 @@ export default function AdminDashboard() {
                 title="Overview & Analytics"
               >
                 <IconTrendingUp className="w-4 h-4 text-mint shrink-0" />
-                {!isSidebarCollapsed && <span>Overview & Analytics</span>}
+                <AnimatePresence>
+                  {!isSidebarCollapsed && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -8 }}
+                      transition={{ duration: 0.2, delay: 0.03 }}
+                      className="truncate"
+                    >
+                      Overview & Analytics
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </button>
 
               <div className="relative">
@@ -248,7 +276,7 @@ export default function AdminDashboard() {
                     setCurrentTab('doctors');
                     setDoctorSubView('manage');
                   }}
-                  className={`text-left rounded-xl text-xs font-semibold flex items-center transition-all cursor-pointer ${
+                  className={`text-left rounded-xl text-xs font-semibold flex items-center transition-all duration-300 cursor-pointer ${
                     isSidebarCollapsed ? 'justify-center p-3 w-12 h-12 mx-auto' : 'px-4 py-3 space-x-3 w-full'
                   } ${
                     currentTab === 'doctors' ? 'bg-[#152B22] text-white font-bold border border-[#2B4E41]' : 'text-sprout/70 hover:bg-forest/20'
@@ -257,16 +285,24 @@ export default function AdminDashboard() {
                   title="Doctor Management"
                 >
                   <IconStethoscope className="w-4 h-4 text-mint shrink-0" />
-                  {!isSidebarCollapsed && (
-                    <div className="flex-1 flex justify-between items-center min-w-0">
-                      <span className="truncate">Doctor Registry</span>
-                      {activeDoctors.filter(d => d.status === 'Pending Verification').length > 0 && (
-                        <span className="bg-red-500 text-white text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full shrink-0 ml-1">
-                          {activeDoctors.filter(d => d.status === 'Pending Verification').length}
-                        </span>
-                      )}
-                    </div>
-                  )}
+                  <AnimatePresence>
+                    {!isSidebarCollapsed && (
+                      <motion.div
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -8 }}
+                        transition={{ duration: 0.2, delay: 0.08 }}
+                        className="flex-1 flex justify-between items-center min-w-0"
+                      >
+                        <span className="truncate">Doctor Registry</span>
+                        {activeDoctors.filter(d => d.status === 'Pending Verification').length > 0 && (
+                          <span className="bg-red-500 text-white text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full shrink-0 ml-1">
+                            {activeDoctors.filter(d => d.status === 'Pending Verification').length}
+                          </span>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </button>
                 {isSidebarCollapsed && activeDoctors.filter(d => d.status === 'Pending Verification').length > 0 && (
                   <span className="absolute top-1 right-2 flex h-2 w-2">
@@ -278,7 +314,7 @@ export default function AdminDashboard() {
 
               <button
                 onClick={() => setCurrentTab('escrow')}
-                className={`text-left rounded-xl text-xs font-semibold flex items-center transition-all cursor-pointer ${
+                className={`text-left rounded-xl text-xs font-semibold flex items-center transition-all duration-300 cursor-pointer ${
                   isSidebarCollapsed ? 'justify-center p-3 w-12 h-12 mx-auto' : 'px-4 py-3 space-x-3 w-full'
                 } ${
                   currentTab === 'escrow' ? 'bg-[#152B22] text-white font-bold border border-[#2B4E41]' : 'text-sprout/70 hover:bg-forest/20'
@@ -287,12 +323,24 @@ export default function AdminDashboard() {
                 title="Escrow Payments"
               >
                 <IconCreditCard className="w-4 h-4 text-mint shrink-0" />
-                {!isSidebarCollapsed && <span>Escrow Payments</span>}
+                <AnimatePresence>
+                  {!isSidebarCollapsed && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -8 }}
+                      transition={{ duration: 0.2, delay: 0.13 }}
+                      className="truncate"
+                    >
+                      Escrow Payments
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </button>
 
               <button
                 onClick={() => setCurrentTab('config')}
-                className={`text-left rounded-xl text-xs font-semibold flex items-center transition-all cursor-pointer ${
+                className={`text-left rounded-xl text-xs font-semibold flex items-center transition-all duration-300 cursor-pointer ${
                   isSidebarCollapsed ? 'justify-center p-3 w-12 h-12 mx-auto' : 'px-4 py-3 space-x-3 w-full'
                 } ${
                   currentTab === 'config' ? 'bg-[#152B22] text-white font-bold border border-[#2B4E41]' : 'text-sprout/70 hover:bg-forest/20'
@@ -301,7 +349,19 @@ export default function AdminDashboard() {
                 title="System Configuration"
               >
                 <IconSettings className="w-4 h-4 text-mint shrink-0" />
-                {!isSidebarCollapsed && <span>System Configuration</span>}
+                <AnimatePresence>
+                  {!isSidebarCollapsed && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -8 }}
+                      transition={{ duration: 0.2, delay: 0.18 }}
+                      className="truncate"
+                    >
+                      System Configuration
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </button>
             </nav>
           </div>
@@ -310,14 +370,25 @@ export default function AdminDashboard() {
           <div className="p-4 border-t border-[#152B22]">
             <button
               onClick={() => navigateTo('/admin/login')}
-              className={`bg-[#152B22] hover:bg-[#1C3A2E] text-red-300 text-xs font-bold transition-all cursor-pointer flex items-center border border-[#2B4E41] ${
+              className={`bg-[#152B22] hover:bg-[#1C3A2E] text-red-300 text-xs font-bold transition-all duration-300 cursor-pointer flex items-center border border-[#2B4E41] ${
                 isSidebarCollapsed ? 'justify-center p-3 w-12 h-12 mx-auto rounded-full' : 'py-2.5 px-4 rounded-xl justify-center space-x-1.5 w-full'
               }`}
               id="admin-sidebar-logout"
               title="Sign Out"
             >
               <IconLogout className="w-3.5 h-3.5 shrink-0" />
-              {!isSidebarCollapsed && <span>Sign Out</span>}
+              <AnimatePresence>
+                {!isSidebarCollapsed && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -8 }}
+                    transition={{ duration: 0.2, delay: 0.23 }}
+                  >
+                    Sign Out
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </button>
           </div>
         </aside>

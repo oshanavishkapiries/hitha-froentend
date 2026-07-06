@@ -108,6 +108,11 @@ export const completeDoctorProfileOnboarding = async (payload: DoctorProfileComp
   return response.data;
 };
 
+export const updateDoctorProfilePicture = async (profilePicture: string): Promise<ApiResponse<any>> => {
+  const response = await axiosInstance.patch<ApiResponse<any>>(ENDPOINTS.doctors.updateProfilePicture, { profilePicture });
+  return response.data;
+};
+
 export const updateDoctorOnlineStatus = async (status: "ONLINE" | "OFFLINE" | "AWAY"): Promise<ApiResponse<any>> => {
   const response = await axiosInstance.patch<ApiResponse<any>>(ENDPOINTS.doctors.updateStatus, { status });
   return response.data;

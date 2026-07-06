@@ -1,14 +1,23 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import AppShell from '../../../components/AppShell';
 import { navigateTo } from '../../../utils/navigation';
-import { ShieldAlert, Stethoscope, Plus, X } from 'lucide-react';
-import { useCompleteDoctorProfile } from '../../../lib/service/query/useDoctor';
+import { ShieldAlert, Stethoscope, Plus, X, UserCircle2, Camera } from 'lucide-react';
+import { useCompleteDoctorProfile, useUpdateDoctorProfilePicture } from '../../../lib/service/query/useDoctor';
+import { useUploadFile } from '../../../lib/service/query/useUpload';
 import { getApiErrorMessage } from '../../../utils/errors';
+import Dropdown from '../../../components/Dropdown';
+
+const MAX_PROFILE_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 
 const LANGUAGE_OPTIONS = ['Sinhala', 'Tamil', 'English'];
-const GENDER_OPTIONS = ['Male', 'Female', 'Other', 'Prefer not to say'];
+const GENDER_OPTIONS = [
+  { value: 'Male', label: 'Male' },
+  { value: 'Female', label: 'Female' },
+  { value: 'Other', label: 'Other' },
+  { value: 'Prefer not to say', label: 'Prefer not to say' },
+];
 
 export default function CompleteDoctorProfilePage() {
   const [professionalBio, setProfessionalBio] = useState('');
@@ -16,9 +25,39 @@ export default function CompleteDoctorProfilePage() {
   const [languages, setLanguages] = useState<string[]>([]);
   const [customLanguage, setCustomLanguage] = useState('');
   const [qualifications, setQualifications] = useState<string[]>(['']);
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [profileImagePreviewUrl, setProfileImagePreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const completeProfileMutation = useCompleteDoctorProfile();
+  const uploadFileMutation = useUploadFile();
+  const updateProfilePictureMutation = useUpdateDoctorProfilePicture();
+
+  useEffect(() => {
+    return () => {
+      if (profileImagePreviewUrl) {
+        URL.revokeObjectURL(profileImagePreviewUrl);
+      }
+    };
+  }, [profileImagePreviewUrl]);
+
+  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (file.size > MAX_PROFILE_IMAGE_SIZE_BYTES) {
+      setError(`${file.name} exceeds the 5MB size limit.`);
+      return;
+    }
+    setProfileImageFile(file);
+    setProfileImagePreviewUrl(URL.createObjectURL(file));
+  };
+
+  const removeProfileImage = () => {
+    setProfileImageFile(null);
+    setProfileImagePreviewUrl(null);
+  };
 
   const toggleLanguage = (lang: string) => {
     setLanguages((prev) => prev.includes(lang) ? prev.filter(l => l !== lang) : [...prev, lang]);
@@ -68,6 +107,19 @@ export default function CompleteDoctorProfilePage() {
     }
 
     try {
+      if (profileImageFile) {
+        setIsUploadingImage(true);
+        try {
+          const imageUrl = await uploadFileMutation.mutateAsync({ file: profileImageFile, folder: 'doctor-profile-pictures' });
+          await updateProfilePictureMutation.mutateAsync(imageUrl);
+        } catch (uploadErr: any) {
+          setError(getApiErrorMessage(uploadErr, 'Failed to upload profile picture.'));
+          return;
+        } finally {
+          setIsUploadingImage(false);
+        }
+      }
+
       const response = await completeProfileMutation.mutateAsync({
         professionalBio: professionalBio.trim(),
         gender,
@@ -89,8 +141,6 @@ export default function CompleteDoctorProfilePage() {
     <AppShell>
       <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8 bg-cream">
         <div className="max-w-xl w-full space-y-8 bg-white p-8 rounded-3xl border border-hairline shadow-resting relative overflow-hidden">
-          <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-mint via-forest to-moss" />
-
           <div className="text-center">
             <div className="mx-auto h-12 w-12 rounded-full bg-mint/10 flex items-center justify-center text-forest mb-4">
               <Stethoscope className="w-6 h-6" />
@@ -111,6 +161,43 @@ export default function CompleteDoctorProfilePage() {
               </div>
             )}
 
+            <div className="flex flex-col items-center gap-2">
+              <div className="relative w-24 h-24">
+                <div className="w-24 h-24 rounded-full bg-cream border border-hairline overflow-hidden flex items-center justify-center">
+                  {profileImagePreviewUrl ? (
+                    <img src={profileImagePreviewUrl} alt="Profile preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <UserCircle2 className="w-14 h-14 text-ink-soft/40" />
+                  )}
+                </div>
+                <label
+                  htmlFor="complete-profile-picture"
+                  className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-forest hover:bg-forest/90 text-white flex items-center justify-center cursor-pointer transition-all shadow-resting"
+                  title="Upload profile photo"
+                >
+                  <Camera className="w-4 h-4" />
+                </label>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={handleProfileImageChange}
+                  className="hidden"
+                  id="complete-profile-picture"
+                />
+              </div>
+              {profileImageFile && (
+                <button
+                  type="button"
+                  onClick={removeProfileImage}
+                  className="text-[11px] text-ink-soft hover:text-red-600 cursor-pointer"
+                  id="complete-profile-remove-picture"
+                >
+                  Remove photo
+                </button>
+              )}
+              <p className="text-[11px] text-ink-soft">Profile photo (optional)</p>
+            </div>
+
             <div>
               <label className="block text-xs font-semibold text-ink-soft mb-1.5">Professional Bio</label>
               <textarea
@@ -126,18 +213,13 @@ export default function CompleteDoctorProfilePage() {
 
             <div>
               <label className="block text-xs font-semibold text-ink-soft mb-1.5">Gender</label>
-              <select
-                required
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-                className="w-full bg-cream border border-hairline focus:border-forest/50 focus:bg-white rounded-xl px-4 py-3 text-sm text-ink outline-none transition-all cursor-pointer"
+              <Dropdown
                 id="complete-profile-gender"
-              >
-                <option value="" disabled>Select gender</option>
-                {GENDER_OPTIONS.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
+                options={GENDER_OPTIONS}
+                value={gender}
+                placeholder="Select gender"
+                onChange={setGender}
+              />
             </div>
 
             <div>
@@ -229,11 +311,16 @@ export default function CompleteDoctorProfilePage() {
 
             <button
               type="submit"
-              disabled={completeProfileMutation.isPending}
+              disabled={completeProfileMutation.isPending || isUploadingImage}
               className="w-full bg-forest hover:bg-forest/90 text-white font-sans font-bold py-3.5 px-4 rounded-xl text-sm transition-all shadow-resting hover:shadow-elevated active:scale-[0.98] flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
               id="complete-profile-submit"
             >
-              {completeProfileMutation.isPending ? (
+              {isUploadingImage ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Uploading Photo...</span>
+                </>
+              ) : completeProfileMutation.isPending ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   <span>Saving Profile...</span>

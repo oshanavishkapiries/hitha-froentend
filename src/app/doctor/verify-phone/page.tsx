@@ -86,8 +86,6 @@ function VerifyPhoneContent() {
     <AppShell>
       <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8 bg-cream">
         <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-3xl border border-hairline shadow-resting relative overflow-hidden">
-          <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-mint via-forest to-moss" />
-
           <div className="text-center">
             <button
               onClick={() => navigateTo('/doctor/register')}

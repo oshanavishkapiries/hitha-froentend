@@ -28,6 +28,7 @@ export const ENDPOINTS = {
     me: "/doctors/me",
     meProfile: "/doctors/me/profile",
     completeProfile: "/doctors/me/complete-profile",
+    updateProfilePicture: "/doctors/me/profile-picture",
     updateStatus: "/doctors/status",
     blockedDates: "/doctors/blocked-dates",
     removeBlockedDate: (id: string) => `/doctors/blocked-dates/${id}`,

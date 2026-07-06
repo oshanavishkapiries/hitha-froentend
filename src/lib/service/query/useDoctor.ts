@@ -13,6 +13,7 @@ import {
   getDoctorPriceRequests,
   submitDoctorPriceRequest,
   completeDoctorProfileOnboarding,
+  updateDoctorProfilePicture,
   DoctorProfileUpdateRequest,
   DoctorProfileCompletionRequest,
   BlockedDateRequest,
@@ -71,6 +72,24 @@ export const useCompleteDoctorProfile = () => {
       const res = await completeDoctorProfileOnboarding(payload);
       if (!res.success) {
         throw new Error(res.message || "Failed to complete profile");
+      }
+      return res;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["doctor_profile"] });
+      queryClient.invalidateQueries({ queryKey: ["doctor_summary"] });
+    },
+  });
+};
+
+export const useUpdateDoctorProfilePicture = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (profilePicture: string) => {
+      const res = await updateDoctorProfilePicture(profilePicture);
+      if (!res.success) {
+        throw new Error(res.message || "Failed to update profile picture");
       }
       return res;
     },
