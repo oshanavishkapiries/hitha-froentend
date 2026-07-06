@@ -605,7 +605,7 @@ export default function AdminDashboard() {
                                     className="p-2 bg-red-100 hover:bg-red-200 text-red-800 rounded-lg cursor-pointer transition-colors disabled:opacity-50 flex items-center justify-center"
                                     title="Reject Request"
                                   >
-                                    <X className="w-3.5 h-3.5" />
+                                    <IconX className="w-3.5 h-3.5" />
                                   </button>
                                   <button
                                     onClick={() => handleApproveDoc(doc.id)}
@@ -613,7 +613,7 @@ export default function AdminDashboard() {
                                     className="p-2 bg-mint/20 hover:bg-mint/40 text-forest rounded-lg cursor-pointer transition-colors disabled:opacity-50 flex items-center justify-center"
                                     title="Approve & Activate"
                                   >
-                                    <Check className="w-3.5 h-3.5" />
+                                    <IconCheck className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
                               )}
