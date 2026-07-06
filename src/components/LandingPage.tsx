@@ -13,12 +13,6 @@ export default function LandingPage() {
         <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-[#C9DFC7] rounded-full filter blur-[100px] opacity-10 pointer-events-none" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          {/* Eyebrow Label */}
-          <div className="inline-flex items-center space-x-2 bg-[#1E4B3A] border border-[#6B8F71] px-4 py-1.5 rounded-full mb-6">
-            <span className="w-2 h-2 rounded-full bg-mint animate-pulse" />
-            <span className="text-xs font-sans font-semibold tracking-wide uppercase text-sprout">Sri Lanka's Anonymous Well-being Sanctuary</span>
-          </div>
-
           {/* Heading (Poppins ~46px) */}
           <h1 className="font-display font-bold text-4xl sm:text-5xl md:text-[46px] leading-[1.15] text-white tracking-tight mb-6">
             ඔබේ පෞද්ගලිකත්වය රකිමින්,<br className="hidden sm:inline" />

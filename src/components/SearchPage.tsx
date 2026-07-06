@@ -291,22 +291,14 @@ export default function SearchPage() {
               </button>
 
               {isDatePickerOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40 cursor-default"
-                    onClick={() => setIsDatePickerOpen(false)}
-                  />
-                  <div className="absolute right-0 top-full mt-1.5 z-50">
-                    <HithaDatePicker
-                      selectedDate={filters.date || ''}
-                      onDateChange={(selectedDateStr) => {
-                        handleFilterChange({ date: selectedDateStr });
-                        setIsDatePickerOpen(false);
-                      }}
-                      onClose={() => setIsDatePickerOpen(false)}
-                    />
-                  </div>
-                </>
+                <HithaDatePicker
+                  selectedDate={filters.date || ''}
+                  onDateChange={(selectedDateStr) => {
+                    handleFilterChange({ date: selectedDateStr });
+                    setIsDatePickerOpen(false);
+                  }}
+                  onClose={() => setIsDatePickerOpen(false)}
+                />
               )}
             </div>
           </div>

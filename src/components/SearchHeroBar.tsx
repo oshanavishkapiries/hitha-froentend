@@ -174,21 +174,14 @@ export default function SearchHeroBar() {
           </button>
 
           {isDatePickerOpen && (
-            <>
-              {/* Overlay to close on outside click */}
-              <div 
-                className="fixed inset-0 z-40 cursor-default" 
-                onClick={() => setIsDatePickerOpen(false)} 
-              />
-              <HithaDatePicker
-                selectedDate={date}
-                onDateChange={(selectedDateStr) => {
-                  setDate(selectedDateStr);
-                  setIsDatePickerOpen(false);
-                }}
-                onClose={() => setIsDatePickerOpen(false)}
-              />
-            </>
+            <HithaDatePicker
+              selectedDate={date}
+              onDateChange={(selectedDateStr) => {
+                setDate(selectedDateStr);
+                setIsDatePickerOpen(false);
+              }}
+              onClose={() => setIsDatePickerOpen(false)}
+            />
           )}
         </div>
 
