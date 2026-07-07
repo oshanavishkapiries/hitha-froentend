@@ -292,53 +292,6 @@ export default function DoctorProfilePage() {
             <span>Back to Dashboard</span>
           </button>
 
-          {/* Header Banner - Highly Mobile Responsive & Visually Enhanced */}
-          <div 
-            className="text-white p-5 sm:p-8 rounded-xl md:rounded-2xl shadow-resting flex flex-col md:flex-row justify-between items-stretch md:items-center gap-5 sm:gap-6 relative overflow-hidden border border-[#2B4E41]/30 animate-fade-in"
-            style={{
-              backgroundImage: "linear-gradient(to right, rgba(20, 43, 34, 0.96), rgba(30, 75, 58, 0.85)), url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80')",
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#8FCB84] rounded-full filter blur-[120px] opacity-10 pointer-events-none" />
-            
-            <div className="relative z-10 w-full md:max-w-xl text-left space-y-0.5">
-              <h1 className="text-lg sm:text-2xl md:text-3xl font-display font-bold break-words leading-tight tracking-wide">
-                Ayubowan, {docName}
-              </h1>
-              <p className="text-[10px] sm:text-xs text-sprout/80 font-medium">Configure your digital sanctuary profile settings.</p>
-            </div>
-
-            {/* Quick Availability Switch & Logout */}
-            <div className="flex flex-row md:flex-col lg:flex-row items-center justify-between sm:justify-start md:items-stretch lg:items-center gap-3 relative z-10 w-full md:w-auto shrink-0">
-              <div className="bg-[#0B1E17] border border-[#2B4E41] px-3.5 py-2 rounded-2xl flex items-center justify-between gap-3 text-sm flex-1 md:flex-none">
-                <div className="flex items-center space-x-1.5 shrink-0">
-                  <span className={`w-2.5 h-2.5 rounded-full ${isActive ? 'bg-mint animate-pulse' : 'bg-gray-400'}`} />
-                  <span className="font-semibold text-[10px] sm:text-xs uppercase tracking-wider text-sprout">
-                    {isActive ? 'Online' : 'Offline'}
-                  </span>
-                </div>
-                <button
-                  onClick={handleToggleActive}
-                  disabled={updateStatusMutation.isPending}
-                  className="bg-white hover:bg-cream text-forest text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50 shrink-0"
-                  id="doctor-status-toggle"
-                >
-                  Change
-                </button>
-              </div>
-
-              <button
-                onClick={() => navigateTo('/doctor/login')}
-                className="bg-red-500/10 hover:bg-red-500/20 text-red-300 hover:text-red-200 border border-red-500/30 py-2 px-3.5 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1 text-xs font-bold shrink-0"
-                id="doctor-logout-btn"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span className="text-[10px] sm:text-xs">Logout</span>
-              </button>
-            </div>
-          </div>
 
           {/* Profile & Settings Form */}
           <div className="bg-white p-6 sm:p-8 rounded-3xl border border-hairline shadow-resting">
