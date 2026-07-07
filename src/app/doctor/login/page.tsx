@@ -4,7 +4,7 @@ import React, { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import AppShell from '../../../components/AppShell';
 import { navigateTo } from '../../../utils/navigation';
-import { Lock, User, ShieldAlert, ArrowLeft, Stethoscope, ShieldCheck } from 'lucide-react';
+import { Lock, User, ShieldAlert, ArrowLeft, Stethoscope, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { useDoctorLogin } from '../../../lib/service/query/useAuth';
 import { getApiErrorMessage } from '../../../utils/errors';
 
@@ -14,6 +14,7 @@ function DoctorLoginContent() {
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
   const loginMutation = useDoctorLogin();
@@ -116,14 +117,21 @@ function DoctorLoginContent() {
                     <Lock className="w-4 h-4" />
                   </div>
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-cream border border-hairline focus:border-forest/50 focus:bg-white rounded-xl pl-10 pr-4 py-3 text-sm text-ink outline-none transition-all"
+                    className="w-full bg-cream border border-hairline focus:border-forest/50 focus:bg-white rounded-xl pl-10 pr-10 py-3 text-sm text-ink outline-none transition-all"
                     placeholder="••••••••"
                     id="doctor-password"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-ink-soft/40 hover:text-forest transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
             </div>

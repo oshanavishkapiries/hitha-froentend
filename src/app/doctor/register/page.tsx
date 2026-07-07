@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import AppShell from '../../../components/AppShell';
 import { navigateTo } from '../../../utils/navigation';
-import { Lock, Mail, Phone, User, ShieldAlert, ArrowLeft, Stethoscope, BadgeCheck, Paperclip, X } from 'lucide-react';
+import { Lock, Mail, Phone, User, ShieldAlert, ArrowLeft, Stethoscope, BadgeCheck, Paperclip, X, Eye, EyeOff } from 'lucide-react';
 import { useDoctorRegister } from '../../../lib/service/query/useAuth';
 import { useUploadFile } from '../../../lib/service/query/useUpload';
 import { DoctorRegRequest } from '../../../lib/service/functions/doctor.service';
@@ -27,7 +27,9 @@ export default function DoctorRegisterPage() {
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [category, setCategory] = useState<DoctorRegRequest['category'] | ''>('');
   const [slmcLicenseNumber, setSlmcLicenseNumber] = useState('');
   const [certificationFiles, setCertificationFiles] = useState<File[]>([]);
@@ -303,29 +305,48 @@ export default function DoctorRegisterPage() {
                     <Lock className="w-4 h-4" />
                   </div>
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
                     minLength={8}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-cream border border-hairline focus:border-forest/50 focus:bg-white rounded-xl pl-10 pr-4 py-3 text-sm text-ink outline-none transition-all"
+                    className="w-full bg-cream border border-hairline focus:border-forest/50 focus:bg-white rounded-xl pl-10 pr-10 py-3 text-sm text-ink outline-none transition-all"
                     placeholder="••••••••"
                     id="doctor-register-password"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-ink-soft/40 hover:text-forest transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-semibold text-ink-soft mb-1.5">Confirm Password</label>
-                <input
-                  type="password"
-                  required
-                  minLength={8}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-cream border border-hairline focus:border-forest/50 focus:bg-white rounded-xl px-4 py-3 text-sm text-ink outline-none transition-all"
-                  placeholder="••••••••"
-                  id="doctor-register-confirm-password"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-ink-soft/40">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    required
+                    minLength={8}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full bg-cream border border-hairline focus:border-forest/50 focus:bg-white rounded-xl pl-10 pr-10 py-3 text-sm text-ink outline-none transition-all"
+                    placeholder="••••••••"
+                    id="doctor-register-confirm-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-ink-soft/40 hover:text-forest transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
             </div>
 

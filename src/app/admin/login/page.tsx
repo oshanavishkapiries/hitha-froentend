@@ -3,13 +3,14 @@
 import React, { useState } from 'react';
 import AppShell from '../../../components/AppShell';
 import { navigateTo } from '../../../utils/navigation';
-import { Lock, Mail, ShieldAlert, ArrowLeft, Terminal, Play } from 'lucide-react';
+import { Lock, Mail, ShieldAlert, ArrowLeft, Terminal, Play, Eye, EyeOff } from 'lucide-react';
 import { useAdminLogin } from '../../../lib/service/query/useAuth';
 import { getApiErrorMessage } from '../../../utils/errors';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   
   const loginMutation = useAdminLogin();
@@ -100,14 +101,21 @@ export default function AdminLogin() {
                     <Lock className="w-4 h-4" />
                   </div>
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[#142B22] border border-[#2B4E41] focus:border-mint/60 rounded-xl pl-10 pr-4 py-3 text-sm text-white outline-none transition-all placeholder:text-sprout/30"
+                    className="w-full bg-[#142B22] border border-[#2B4E41] focus:border-mint/60 rounded-xl pl-10 pr-10 py-3 text-sm text-white outline-none transition-all placeholder:text-sprout/30"
                     placeholder="••••••••"
                     id="admin-password"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sprout/40 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
             </div>
