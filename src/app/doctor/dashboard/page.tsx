@@ -37,7 +37,7 @@ export default function DoctorDashboard() {
   // Automatically enable server status status if doctor summary is loaded
   useEffect(() => {
     if (realSummary) {
-      setIsActive(realSummary.status === "ONLINE");
+      setIsActive(realSummary.status === "ACTIVE");
     }
   }, [realSummary]);
 
@@ -53,8 +53,8 @@ export default function DoctorDashboard() {
     const nextState = !isActive;
     setIsActive(nextState);
     try {
-      await updateStatusMutation.mutateAsync(nextState ? "ONLINE" : "OFFLINE");
-      showAlert(`Status updated to ${nextState ? "ONLINE" : "OFFLINE"} successfully.`, "success");
+      await updateStatusMutation.mutateAsync(nextState ? "ACTIVE" : "PAUSED");
+      showAlert(`Status updated to ${nextState ? "Online" : "Offline"} successfully.`, "success");
     } catch (err: any) {
       showAlert(`API Error: ${getApiErrorMessage(err, 'Failed to update status on server.')}`, "error");
       setIsActive(isActive); // Revert state

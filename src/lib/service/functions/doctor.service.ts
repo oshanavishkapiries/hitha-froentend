@@ -116,7 +116,7 @@ export const updateDoctorProfilePicture = async (profilePicture: string): Promis
   return response.data;
 };
 
-export const updateDoctorOnlineStatus = async (status: "ONLINE" | "OFFLINE" | "AWAY"): Promise<ApiResponse<any>> => {
+export const updateDoctorOnlineStatus = async (status: "ONLINE" | "OFFLINE" | "AWAY" | "ACTIVE" | "PAUSED"): Promise<ApiResponse<any>> => {
   const response = await axiosInstance.patch<ApiResponse<any>>(ENDPOINTS.doctors.updateStatus, { status });
   return response.data;
 };

@@ -99,7 +99,7 @@ export default function DoctorProfilePage() {
   // Automatically enable server database mode if doctor summary data is successfully retrieved
   useEffect(() => {
     if (realSummary) {
-      setIsActive(realSummary.status === "ONLINE");
+      setIsActive(realSummary.status === "ACTIVE");
     }
   }, [realSummary]);
 
@@ -115,8 +115,8 @@ export default function DoctorProfilePage() {
     const nextState = !isActive;
     setIsActive(nextState);
     try {
-      await updateStatusMutation.mutateAsync(nextState ? "ONLINE" : "OFFLINE");
-      showAlert(`Status updated to ${nextState ? "ONLINE" : "OFFLINE"} successfully.`, "success");
+      await updateStatusMutation.mutateAsync(nextState ? "ACTIVE" : "PAUSED");
+      showAlert(`Status updated to ${nextState ? "Online" : "Offline"} successfully.`, "success");
     } catch (err: any) {
       showAlert(`API Error: ${getApiErrorMessage(err, 'Failed to update status on server.')}`, "error");
       setIsActive(isActive);

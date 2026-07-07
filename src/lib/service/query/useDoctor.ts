@@ -105,7 +105,7 @@ export const useUpdateDoctorStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (status: "ONLINE" | "OFFLINE" | "AWAY") => {
+    mutationFn: async (status: "ONLINE" | "OFFLINE" | "AWAY" | "ACTIVE" | "PAUSED") => {
       const res = await updateDoctorOnlineStatus(status);
       if (!res.success) {
         throw new Error(res.message || "Failed to update status");
