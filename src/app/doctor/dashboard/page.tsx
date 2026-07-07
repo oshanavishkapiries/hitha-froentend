@@ -98,14 +98,22 @@ export default function DoctorDashboard() {
       <div className="bg-cream min-h-screen py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-8">
           
-          {/* Header Banner - Highly Mobile Responsive */}
-          <div className="bg-gradient-to-r from-[#142B22] to-[#1E4B3A] text-white p-5 sm:p-8 rounded-2xl md:rounded-3xl shadow-resting flex flex-col md:flex-row justify-between items-stretch md:items-center gap-5 sm:gap-6 relative overflow-hidden">
+          {/* Header Banner - Highly Mobile Responsive & Visually Enhanced */}
+          <div 
+            className="text-white p-5 sm:p-8 rounded-xl md:rounded-2xl shadow-resting flex flex-col md:flex-row justify-between items-stretch md:items-center gap-5 sm:gap-6 relative overflow-hidden border border-[#2B4E41]/30 animate-fade-in"
+            style={{
+              backgroundImage: "linear-gradient(to right, rgba(20, 43, 34, 0.96), rgba(30, 75, 58, 0.85)), url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#8FCB84] rounded-full filter blur-[120px] opacity-10 pointer-events-none" />
             
-            <div className="relative z-10 w-full md:max-w-xl text-left">
-              <h1 className="text-lg sm:text-2xl md:text-3xl font-display font-bold break-words leading-tight">
+            <div className="relative z-10 w-full md:max-w-xl text-left space-y-0.5">
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-display font-bold break-words leading-tight tracking-wide">
                 Ayubowan, {docName}
               </h1>
+              <p className="text-[10px] sm:text-xs text-sprout/80 font-medium">Welcome back to your digital sanctuary dashboard.</p>
             </div>
 
             {/* Quick Availability Switch & Logout */}
