@@ -3,8 +3,7 @@
 import React from 'react';
 import AppShell from '../../../components/AppShell';
 import AdminSidebarShell from '../../../components/admin/AdminSidebarShell';
-import { navigateTo } from '../../../utils/navigation';
-import { IconActivity, IconStethoscope } from '@tabler/icons-react';
+import { IconActivity } from '@tabler/icons-react';
 import { useDoctorApplications } from '../../../lib/service/query/useAdmin';
 
 export default function AdminOverviewPage() {
@@ -18,22 +17,6 @@ export default function AdminOverviewPage() {
         activeNav="overview"
         title="Administration Dashboard"
         subtitle="Manage doctor verifications and platform statistics."
-        titleAction={
-          <button
-            onClick={() => navigateTo('/admin/doctors?view=requests')}
-            className="bg-mint/20 hover:bg-mint/40 text-forest text-xs font-bold px-4 py-2.5 rounded-xl border border-mint/30 cursor-pointer flex items-center space-x-2 transition-all"
-            id="dashboard-registration-requests-btn"
-            title="Go to Registration Request Page"
-          >
-            <IconStethoscope className="w-4 h-4" />
-            <span>View Requests</span>
-            {pendingCount > 0 && (
-              <span className="bg-red-500 text-white text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full">
-                {pendingCount}
-              </span>
-            )}
-          </button>
-        }
       >
         <div className="space-y-8">
 

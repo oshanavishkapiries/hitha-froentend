@@ -169,8 +169,8 @@ function AdminDoctorRegistryContent() {
     <AppShell>
       <AdminSidebarShell
         activeNav="doctors"
-        title="Administration Dashboard"
-        subtitle="Manage doctor verifications and platform statistics."
+        title="Doctor Registry"
+        subtitle="Manage approved practitioners, audit statuses, or verify incoming registration requests."
         headerActions={
           <button
             onClick={() => setIsDoctorSearchPopupOpen(true)}
@@ -206,14 +206,6 @@ function AdminDoctorRegistryContent() {
         }
       >
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-hairline shadow-resting space-y-6">
-
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#EBE8DF]">
-            <div>
-              <h2 className="text-xl font-display font-bold text-forest">Doctor Registry Portal</h2>
-              <p className="text-xs text-ink-soft mt-1">Manage approved practitioners, audit statuses, or verify incoming registration requests.</p>
-            </div>
-          </div>
 
           {/* View 1: Doctor Registration Requests */}
           {doctorSubView === 'requests' && (
