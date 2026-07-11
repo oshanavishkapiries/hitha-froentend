@@ -6,20 +6,20 @@
   --font-display: "Poppins", "Noto Sans Sinhala", "Noto Sans Tamil", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-cream: #F7F4EC;
-  --color-mint: #8FCB84;
-  --color-mint-dark: #6EAE64;
-  --color-mint-text: #123227;
-  --color-forest: #1E4B3A;
-  --color-moss: #6B8F71;
-  --color-sprout: #C9DFC7;
+  --color-cream: #E8F6F1;
+  --color-mint: #00A8B5;
+  --color-mint-dark: #008A95;
+  --color-mint-text: #0A2A38;
+  --color-forest: #0D3B66;
+  --color-moss: #4CAF50;
+  --color-sprout: #A8D672;
   --color-saffron: #D4A24C;
   --color-clay: #B5533C;
   --color-clay-tint: #F4E2DD;
-  --color-ink: #1B2420;
-  --color-ink-soft: #4B564F;
-  --color-ink-faint: #8A9490;
-  --color-hairline: #E2DCCB;
+  --color-ink: #081A29;
+  --color-ink-soft: #3A4E5E;
+  --color-ink-faint: #6A8094;
+  --color-hairline: #C2DDD5;
 
   --radius-card: 22px;
   --radius-sub: 14px;
@@ -79,5 +79,94 @@ body {
 /* Firefox scrollbar compatibility */
 * {
   scrollbar-width: none;
+}
+
+/* Editor.js theming — reuses the Hitha design tokens above instead of the library's defaults */
+.hitha-block-editor {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+}
+
+.hitha-block-editor .codex-editor__redactor {
+  padding-bottom: 80px !important;
+}
+
+.hitha-block-editor .ce-block__content,
+.hitha-block-editor .ce-toolbar__content {
+  max-width: 100%;
+}
+
+.hitha-block-editor .ce-paragraph {
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.hitha-block-editor .ce-header {
+  font-family: var(--font-display);
+  color: var(--color-forest);
+  font-weight: 700;
+}
+
+.hitha-block-editor .ce-block--selected .ce-block__content {
+  background: color-mix(in srgb, var(--color-mint) 12%, transparent);
+  border-radius: var(--radius-small-comp);
+}
+
+.hitha-block-editor ::selection {
+  background: color-mix(in srgb, var(--color-mint) 35%, transparent);
+}
+
+.hitha-block-editor .ce-toolbar__plus,
+.hitha-block-editor .ce-toolbar__settings-btn {
+  color: var(--color-moss);
+  border-radius: var(--radius-small-comp);
+}
+
+.hitha-block-editor .ce-toolbar__plus:hover,
+.hitha-block-editor .ce-toolbar__settings-btn:hover {
+  background: var(--color-sprout);
+  color: var(--color-forest);
+}
+
+.hitha-block-editor .ce-inline-toolbar,
+.hitha-block-editor .ce-conversion-toolbar,
+.hitha-block-editor .ce-settings,
+.hitha-block-editor .ce-popover {
+  background: #FFFFFF;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-sub);
+  box-shadow: var(--shadow-elevated);
+}
+
+.hitha-block-editor .ce-inline-tool,
+.hitha-block-editor .ce-popover-item {
+  color: var(--color-ink-soft);
+}
+
+.hitha-block-editor .ce-inline-tool:hover,
+.hitha-block-editor .ce-popover-item:hover,
+.hitha-block-editor .ce-inline-tool--active {
+  background: var(--color-sprout);
+  color: var(--color-forest);
+}
+
+.hitha-block-editor .cdx-quote {
+  border-left: 3px solid var(--color-mint);
+  padding-left: 14px;
+  font-style: italic;
+  color: var(--color-ink-soft);
+}
+
+.hitha-block-editor .cdx-marker {
+  background: color-mix(in srgb, var(--color-saffron) 35%, transparent);
+}
+
+.hitha-block-editor .cdx-checklist__item-checkbox {
+  accent-color: var(--color-forest);
+}
+
+.hitha-block-editor [data-placeholder]::before,
+.hitha-block-editor .ce-paragraph[data-placeholder]:empty::before {
+  color: var(--color-ink-faint);
 }
 
