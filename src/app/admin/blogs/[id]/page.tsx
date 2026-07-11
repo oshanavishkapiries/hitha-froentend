@@ -13,13 +13,13 @@ export default function EditAdminBlogPage() {
   return (
     <AppShell>
       <AdminSidebarShell
-        activeNav="blogs-mine"
+        activeNav="blogs"
         title="Edit Article"
         subtitle="Publish wellness guidance directly from the Hitha admin team."
       >
         <BlogEditorForm
           blogId={id}
-          backHref="/admin/blogs"
+          backHref="/admin/blogs?view=mine"
           afterSaveHref={(savedId) => `/admin/blogs/${savedId}`}
           uploadFolder="blog-covers"
         />
