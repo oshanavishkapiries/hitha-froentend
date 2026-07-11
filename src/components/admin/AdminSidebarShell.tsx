@@ -44,11 +44,11 @@ export default function AdminSidebarShell({
     <div className="bg-cream min-h-screen flex flex-row overflow-hidden" id="admin-dashboard-container">
 
       {/* Left Column (Sidebar) */}
-      <aside className={`bg-ink text-white shrink-0 flex flex-col border-r border-[#152B22] transition-all duration-300 h-screen overflow-y-auto ${
+      <aside className={`bg-forest-dark text-white shrink-0 flex flex-col border-r border-forest-divider transition-all duration-300 h-screen overflow-y-auto ${
         isSidebarCollapsed ? 'w-20' : 'w-64'
       }`} id="admin-sidebar">
         {/* Logo Element (Top section aligned with right header) */}
-        <div className="h-16 flex items-center px-6 border-b border-[#152B22] shrink-0 justify-between" id="admin-sidebar-logo-container">
+        <div className="h-16 flex items-center px-6 border-b border-forest-divider shrink-0 justify-between" id="admin-sidebar-logo-container">
           <AnimatePresence mode="wait">
             {!isSidebarCollapsed ? (
               <motion.div
@@ -86,7 +86,7 @@ export default function AdminSidebarShell({
               className={`text-left rounded-xl text-xs font-semibold flex items-center transition-all duration-300 cursor-pointer ${
                 isSidebarCollapsed ? 'justify-center p-3 w-12 h-12 mx-auto' : 'px-4 py-3 space-x-3 w-full'
               } ${
-                activeNav === 'overview' ? 'bg-[#152B22] text-white font-bold border border-[#2B4E41]' : 'text-sprout/70 hover:bg-forest/20'
+                activeNav === 'overview' ? 'bg-forest-muted text-white font-bold border border-forest-border' : 'text-sprout/70 hover:bg-forest/20'
               }`}
               id="admin-tab-overview"
               title="Overview & Analytics"
@@ -113,7 +113,7 @@ export default function AdminSidebarShell({
                 className={`text-left rounded-xl text-xs font-semibold flex items-center transition-all duration-300 cursor-pointer ${
                   isSidebarCollapsed ? 'justify-center p-3 w-12 h-12 mx-auto' : 'px-4 py-3 space-x-3 w-full'
                 } ${
-                  activeNav === 'doctors' ? 'bg-[#152B22] text-white font-bold border border-[#2B4E41]' : 'text-sprout/70 hover:bg-forest/20'
+                  activeNav === 'doctors' ? 'bg-forest-muted text-white font-bold border border-forest-border' : 'text-sprout/70 hover:bg-forest/20'
                 }`}
                 id="admin-tab-doctors"
                 title="Doctor Management"
@@ -152,7 +152,7 @@ export default function AdminSidebarShell({
                 className={`text-left rounded-xl text-xs font-semibold flex items-center transition-all duration-300 cursor-pointer ${
                   isSidebarCollapsed ? 'justify-center p-3 w-12 h-12 mx-auto' : 'px-4 py-3 space-x-3 w-full'
                 } ${
-                  activeNav === 'blogs' ? 'bg-[#152B22] text-white font-bold border border-[#2B4E41]' : 'text-sprout/70 hover:bg-forest/20'
+                  activeNav === 'blogs' ? 'bg-forest-muted text-white font-bold border border-forest-border' : 'text-sprout/70 hover:bg-forest/20'
                 }`}
                 id="admin-tab-blogs"
                 title="Blogs"
@@ -188,10 +188,10 @@ export default function AdminSidebarShell({
         </div>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-[#152B22]">
+        <div className="p-4 border-t border-forest-divider">
           <button
             onClick={() => navigateTo('/admin/login')}
-            className={`bg-[#152B22] hover:bg-[#1C3A2E] text-red-300 text-xs font-bold transition-all duration-300 cursor-pointer flex items-center border border-[#2B4E41] ${
+            className={`bg-forest-muted hover:bg-forest-hover text-red-300 text-xs font-bold transition-all duration-300 cursor-pointer flex items-center border border-forest-border ${
               isSidebarCollapsed ? 'justify-center p-3 w-12 h-12 mx-auto rounded-full' : 'py-2.5 px-4 rounded-xl justify-center space-x-1.5 w-full'
             }`}
             id="admin-sidebar-logout"
@@ -223,14 +223,14 @@ export default function AdminSidebarShell({
           <div className="flex items-center">
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="p-1.5 border border-hairline rounded-lg bg-white text-ink hover:bg-cream hover:text-forest transition-all cursor-pointer focus:outline-none flex items-center justify-center shadow-sm"
+              className="p-1.5 border border-hairline rounded-lg bg-white text-forest-dark hover:bg-cream-light hover:text-forest-ink transition-all cursor-pointer focus:outline-none flex items-center justify-center shadow-sm"
               title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
               id="admin-sidebar-toggle-btn"
             >
               {isSidebarCollapsed ? (
-                <IconChevronRight className="w-4 h-4 text-ink" />
+                <IconChevronRight className="w-4 h-4 text-forest-dark" />
               ) : (
-                <IconChevronLeft className="w-4 h-4 text-ink" />
+                <IconChevronLeft className="w-4 h-4 text-forest-dark" />
               )}
             </button>
           </div>
@@ -247,8 +247,8 @@ export default function AdminSidebarShell({
                 AD
               </div>
               <div className="hidden sm:block text-left">
-                <h5 className="text-[11px] font-bold text-ink leading-tight">Admin Root</h5>
-                <span className="text-[9px] text-ink-soft block leading-none">admin@hitha.lk</span>
+                <h5 className="text-[11px] font-bold text-forest-dark leading-tight">Admin Root</h5>
+                <span className="text-[9px] text-forest-dark/50 block leading-none">admin@hitha.lk</span>
               </div>
             </div>
           </div>

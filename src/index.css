@@ -21,6 +21,18 @@
   --color-ink-faint: #8A9490;
   --color-hairline: #E2DCCB;
 
+  --color-forest-dark: #0B1E17;
+  --color-forest-deep: #081611;
+  --color-forest-medium: #142B22;
+  --color-forest-muted: #152B22;
+  --color-forest-hover: #1A3429;
+  --color-forest-border: #2B4E41;
+  --color-forest-divider: #152B22;
+  --color-forest-ink: #0D241C;
+  --color-mint-light: #9ED993;
+  --color-cream-light: #FAF9F5;
+  --color-cream-border: #EBE8DF;
+
   --radius-card: 22px;
   --radius-sub: 14px;
   --radius-small-comp: 8px;
