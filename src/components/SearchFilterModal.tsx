@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, RotateCcw } from 'lucide-react';
 import { FilterParams, Specialization } from '../types';
+import Dropdown from './Dropdown';
 
 interface SearchFilterModalProps {
   filters: FilterParams;
@@ -18,8 +19,22 @@ const specializations: Specialization[] = [
   'Consultant Psychiatrist',
 ];
 
+const categoryOptions = [
+  { value: '', label: 'All Specializations' },
+  ...specializations.map((spec) => ({ value: spec, label: spec })),
+];
+
 const languages = ['Sinhala', 'Tamil', 'English'];
+const languageOptions = [
+  { value: '', label: 'All Languages' },
+  ...languages.map((lang) => ({ value: lang, label: lang })),
+];
+
 const genders = ['Male', 'Female'];
+const genderOptions = [
+  { value: '', label: 'All Genders' },
+  ...genders.map((gen) => ({ value: gen, label: gen })),
+];
 
 export default function SearchFilterModal({ filters, onChange, onReset, onClose }: SearchFilterModalProps) {
   return (
@@ -50,56 +65,38 @@ export default function SearchFilterModal({ filters, onChange, onReset, onClose 
           {/* Specialization Category */}
           <div className="space-y-1.5">
             <label className="block text-[11px] font-sans font-bold text-ink-soft uppercase tracking-wider">Category</label>
-            <select
-              value={filters.category || ''}
-              onChange={(e) => onChange({ category: e.target.value as Specialization | '' })}
-              className="w-full bg-cream/30 hover:bg-cream/60 focus:bg-white text-xs text-ink rounded-sub px-3 py-2.5 border border-hairline focus:border-moss outline-none transition-all cursor-pointer"
+            <Dropdown
               id="filter-category"
-            >
-              <option value="">All Specializations</option>
-              {specializations.map((spec) => (
-                <option key={spec} value={spec}>
-                  {spec}
-                </option>
-              ))}
-            </select>
+              options={categoryOptions}
+              value={filters.category || ''}
+              onChange={(value) => onChange({ category: value as Specialization | '' })}
+              placeholder="All Specializations"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             {/* Language Selection */}
             <div className="space-y-1.5">
               <label className="block text-[11px] font-sans font-bold text-ink-soft uppercase tracking-wider">Language</label>
-              <select
-                value={filters.language || ''}
-                onChange={(e) => onChange({ language: e.target.value })}
-                className="w-full bg-cream/30 hover:bg-cream/60 focus:bg-white text-xs text-ink rounded-sub px-3 py-2.5 border border-hairline focus:border-moss outline-none transition-all cursor-pointer"
+              <Dropdown
                 id="filter-language"
-              >
-                <option value="">All Languages</option>
-                {languages.map((lang) => (
-                  <option key={lang} value={lang}>
-                    {lang}
-                  </option>
-                ))}
-              </select>
+                options={languageOptions}
+                value={filters.language || ''}
+                onChange={(value) => onChange({ language: value })}
+                placeholder="All Languages"
+              />
             </div>
 
             {/* Gender Selection */}
             <div className="space-y-1.5">
               <label className="block text-[11px] font-sans font-bold text-ink-soft uppercase tracking-wider">Gender</label>
-              <select
-                value={filters.gender || ''}
-                onChange={(e) => onChange({ gender: e.target.value })}
-                className="w-full bg-cream/30 hover:bg-cream/60 focus:bg-white text-xs text-ink rounded-sub px-3 py-2.5 border border-hairline focus:border-moss outline-none transition-all cursor-pointer"
+              <Dropdown
                 id="filter-gender"
-              >
-                <option value="">All Genders</option>
-                {genders.map((gen) => (
-                  <option key={gen} value={gen}>
-                    {gen}
-                  </option>
-                ))}
-              </select>
+                options={genderOptions}
+                value={filters.gender || ''}
+                onChange={(value) => onChange({ gender: value })}
+                placeholder="All Genders"
+              />
             </div>
           </div>
 
