@@ -16,6 +16,7 @@ import {
   IconUsersGroup,
 } from '@tabler/icons-react';
 import { useDoctorApplications, usePendingBlogs } from '../../lib/service/query/useAdmin';
+import AdminBottomNav from './AdminBottomNav';
 
 interface AdminSidebarShellProps {
   activeNav: 'overview' | 'doctors' | 'blogs' | 'team';
@@ -50,8 +51,8 @@ export default function AdminSidebarShell({
   return (
     <div className="bg-cream min-h-screen flex flex-row overflow-hidden" id="admin-dashboard-container">
 
-      {/* Left Column (Sidebar) */}
-      <aside className={`bg-forest-dark text-white shrink-0 flex flex-col border-r border-forest-divider transition-all duration-300 h-screen overflow-y-auto ${
+      {/* Left Column (Sidebar) — desktop/tablet only, replaced by AdminBottomNav below lg */}
+      <aside className={`hidden lg:flex bg-forest-dark text-white shrink-0 flex-col border-r border-forest-divider transition-all duration-300 h-screen overflow-y-auto ${
         isSidebarCollapsed ? 'w-20' : 'w-64'
       }`} id="admin-sidebar">
         {/* Logo Element (Top section aligned with right header) */}
@@ -254,8 +255,8 @@ export default function AdminSidebarShell({
 
         {/* Top Header of Right Column */}
         <header className="h-16 bg-white border-b border-hairline flex items-center justify-between px-6 shrink-0" id="admin-main-header">
-          {/* Header Left (Collapse button '<' / '>') */}
-          <div className="flex items-center">
+          {/* Header Left (Collapse button '<' / '>') — desktop/tablet only */}
+          <div className="hidden lg:flex items-center">
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               className="p-1.5 border border-hairline rounded-lg bg-white text-forest-dark hover:bg-cream-light hover:text-forest-ink transition-all cursor-pointer focus:outline-none flex items-center justify-center shadow-sm"
@@ -269,6 +270,9 @@ export default function AdminSidebarShell({
               )}
             </button>
           </div>
+
+          {/* Mobile branding (sidebar logo is hidden below lg) */}
+          <Logo theme="dark" id="admin-header-logo-mobile" className="lg:hidden text-lg" />
 
           {/* Header Right (search, profile) */}
           <div className="flex items-center space-x-6">
@@ -290,7 +294,7 @@ export default function AdminSidebarShell({
         </header>
 
         {/* Admin Dashboard Core Display Panel */}
-        <main className="flex-1 p-6 sm:p-8 space-y-8 overflow-y-auto bg-cream" id="admin-main-content">
+        <main className="flex-1 px-6 sm:px-8 pt-6 sm:pt-8 pb-24 lg:pb-8 space-y-8 overflow-y-auto bg-cream" id="admin-main-content">
 
           {/* Top Info Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-hairline pb-4" id="admin-title-row">
@@ -305,6 +309,8 @@ export default function AdminSidebarShell({
 
         </main>
       </div>
+
+      <AdminBottomNav activeNav={activeNav} />
     </div>
   );
 }
